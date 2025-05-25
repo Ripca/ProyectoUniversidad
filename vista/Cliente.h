@@ -57,10 +57,10 @@ public:
         ConexionBD cn = ConexionBD();
         cn.abrir_conexion();
         if (cn.getConector()) {
-            string id = to_string(idCliente);
             string gen = genero ? "1" : "0";
-            
-            string consulta = "INSERT INTO Clientes(idCliente, nombres, apellidos, NIT, genero, telefono, correo_electronico, fecha_ingreso) VALUES (" + id + ", '" + nombres + "', '" + apellidos + "', '" + NIT + "', " + gen + ", '" + telefono + "', '" + correo_electronico + "', '" + fecha_ingreso + "');";
+
+            // Modificamos la consulta para usar AUTO_INCREMENT
+            string consulta = "INSERT INTO Clientes(nombres, apellidos, NIT, genero, telefono, correo_electronico, fecha_ingreso) VALUES ('" + nombres + "', '" + apellidos + "', '" + NIT + "', " + gen + ", '" + telefono + "', '" + correo_electronico + "', '" + fecha_ingreso + "');";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);
             if (!q_estado) {
@@ -114,7 +114,7 @@ public:
         if (cn.getConector()) {
             string id = to_string(idCliente);
             string gen = genero ? "1" : "0";
-            
+
             string consulta = "UPDATE Clientes SET nombres = '" + nombres + "', apellidos = '" + apellidos + "', NIT = '" + NIT + "', genero = " + gen + ", telefono = '" + telefono + "', correo_electronico = '" + correo_electronico + "', fecha_ingreso = '" + fecha_ingreso + "' WHERE idCliente = " + id + ";";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);

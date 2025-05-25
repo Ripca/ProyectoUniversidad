@@ -33,8 +33,8 @@ public:
         ConexionBD cn = ConexionBD();
         cn.abrir_conexion();
         if (cn.getConector()) {
-            string id = to_string(idPuesto);
-            string consulta = "INSERT INTO Puestos(idPuesto, puesto) VALUES (" + id + ", '" + puesto + "');";
+            // Modificamos la consulta para usar AUTO_INCREMENT
+            string consulta = "INSERT INTO Puestos(puesto) VALUES ('" + puesto + "');";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);
             if (!q_estado) {

@@ -69,11 +69,11 @@ public:
         ConexionBD cn = ConexionBD();
         cn.abrir_conexion();
         if (cn.getConector()) {
-            string id = to_string(idEmpleado);
             string gen = genero ? "1" : "0";
             string idP = to_string(idPuesto);
-            
-            string consulta = "INSERT INTO Empleados(idEmpleado, nombres, apellidos, direccion, telefono, DPI, genero, fecha_nacimiento, idPuesto, fecha_inicio_labores, fecha_ingreso) VALUES (" + id + ", '" + nombres + "', '" + apellidos + "', '" + direccion + "', '" + telefono + "', '" + DPI + "', " + gen + ", '" + fecha_nacimiento + "', " + idP + ", '" + fecha_inicio_labores + "', '" + fecha_ingreso + "');";
+
+            // Modificamos la consulta para usar AUTO_INCREMENT
+            string consulta = "INSERT INTO Empleados(nombres, apellidos, direccion, telefono, DPI, genero, fecha_nacimiento, idPuesto, fecha_inicio_labores, fecha_ingreso) VALUES ('" + nombres + "', '" + apellidos + "', '" + direccion + "', '" + telefono + "', '" + DPI + "', " + gen + ", '" + fecha_nacimiento + "', " + idP + ", '" + fecha_inicio_labores + "', '" + fecha_ingreso + "');";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);
             if (!q_estado) {
@@ -128,7 +128,7 @@ public:
             string id = to_string(idEmpleado);
             string gen = genero ? "1" : "0";
             string idP = to_string(idPuesto);
-            
+
             string consulta = "UPDATE Empleados SET nombres = '" + nombres + "', apellidos = '" + apellidos + "', direccion = '" + direccion + "', telefono = '" + telefono + "', DPI = '" + DPI + "', genero = " + gen + ", fecha_nacimiento = '" + fecha_nacimiento + "', idPuesto = " + idP + ", fecha_inicio_labores = '" + fecha_inicio_labores + "', fecha_ingreso = '" + fecha_ingreso + "' WHERE idEmpleado = " + id + ";";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);

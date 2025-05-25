@@ -45,8 +45,8 @@ public:
         ConexionBD cn = ConexionBD();
         cn.abrir_conexion();
         if (cn.getConector()) {
-            string id = to_string(idProveedor);
-            string consulta = "INSERT INTO Proveedores(idProveedor, proveedor, nit, direccion, telefono) VALUES (" + id + ", '" + proveedor + "', '" + nit + "', '" + direccion + "', '" + telefono + "');";
+            // Modificamos la consulta para usar AUTO_INCREMENT
+            string consulta = "INSERT INTO Proveedores(proveedor, nit, direccion, telefono) VALUES ('" + proveedor + "', '" + nit + "', '" + direccion + "', '" + telefono + "');";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);
             if (!q_estado) {

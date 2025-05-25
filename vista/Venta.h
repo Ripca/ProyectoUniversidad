@@ -66,31 +66,44 @@ public:
         ConexionBD cn = ConexionBD();
         cn.abrir_conexion();
         if (cn.getConector()) {
-            string id = to_string(idVenta);
             string nf = to_string(nofactura);
             string s(1, serie);
             string idc = to_string(idcliente);
             string ide = to_string(idempleado);
-            
-            string consulta = "INSERT INTO Ventas(idVenta, nofactura, serie, fechafactura, idcliente, idempleado, fecha_ingreso) VALUES (" + id + ", " + nf + ", '" + s + "', '" + fechafactura + "', " + idc + ", " + ide + ", '" + fecha_ingreso + "');";
+
+            // Modificamos la consulta para usar AUTO_INCREMENT
+            string consulta = "INSERT INTO Ventas(nofactura, serie, fechafactura, idcliente, idempleado, fecha_ingreso) VALUES (" + nf + ", '" + s + "', '" + fechafactura + "', " + idc + ", " + ide + ", '" + fecha_ingreso + "');";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);
             if (!q_estado) {
                 cout << "Ingreso de Venta Exitoso..." << endl;
-                
-                // Insertar detalles de venta
-                for (DetalleVenta detalle : detalles) {
-                    string idvd = to_string(detalle.idventa_detalle);
-                    string idprod = to_string(detalle.idProducto);
-                    string pu = to_string(detalle.precio_unitario);
-                    
-                    string consultaDetalle = "INSERT INTO Ventas_detalle(idventa_detalle, idventa, idProducto, cantidad, precio_unitario) VALUES (" + idvd + ", " + id + ", " + idprod + ", '" + detalle.cantidad + "', " + pu + ");";
-                    const char* cd = consultaDetalle.c_str();
-                    q_estado = mysql_query(cn.getConector(), cd);
-                    if (q_estado) {
-                        cout << "xxx Error al ingresar detalle de venta xxx" << endl;
-                        cout << consultaDetalle << endl;
+
+                // Obtener el ID de la venta recién insertada
+                q_estado = mysql_query(cn.getConector(), "SELECT LAST_INSERT_ID();");
+                if (!q_estado) {
+                    MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+                    MYSQL_ROW fila = mysql_fetch_row(resultado);
+                    string id = fila[0];
+
+                    // Insertar detalles de venta
+                    for (DetalleVenta detalle : detalles) {
+                        string idprod = to_string(detalle.idProducto);
+                        string pu = to_string(detalle.precio_unitario);
+
+                        // Modificamos la consulta para usar AUTO_INCREMENT
+                        string consultaDetalle = "INSERT INTO Ventas_detalle(idventa, idProducto, cantidad, precio_unitario) VALUES (" + id + ", " + idprod + ", '" + detalle.cantidad + "', " + pu + ");";
+                        const char* cd = consultaDetalle.c_str();
+                        q_estado = mysql_query(cn.getConector(), cd);
+                        if (q_estado) {
+                            cout << "xxx Error al ingresar detalle de venta xxx" << endl;
+                            cout << consultaDetalle << endl;
+                        }
                     }
+
+                    mysql_free_result(resultado);
+                }
+                else {
+                    cout << "xxx Error al obtener ID de la venta xxx" << endl;
                 }
             }
             else {
@@ -179,7 +192,7 @@ public:
             string s(1, serie);
             string idc = to_string(idcliente);
             string ide = to_string(idempleado);
-            
+
             string consulta = "UPDATE Ventas SET nofactura = " + nf + ", serie = '" + s + "', fechafactura = '" + fechafactura + "', idcliente = " + idc + ", idempleado = " + ide + ", fecha_ingreso = '" + fecha_ingreso + "' WHERE idVenta = " + id + ";";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);
@@ -203,7 +216,7 @@ public:
         cn.abrir_conexion();
         if (cn.getConector()) {
             string id = to_string(idVenta);
-            
+
             // Primero eliminar los detalles
             string consultaDetalles = "DELETE FROM Ventas_detalle WHERE idventa = " + id + ";";
             const char* cd = consultaDetalles.c_str();

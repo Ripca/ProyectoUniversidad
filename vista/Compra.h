@@ -58,30 +58,43 @@ public:
         ConexionBD cn = ConexionBD();
         cn.abrir_conexion();
         if (cn.getConector()) {
-            string id = to_string(idcompra);
             string noc = to_string(no_order_compra);
             string idp = to_string(idproveedor);
-            
-            string consulta = "INSERT INTO Compras(idcompra, no_order_compra, idproveedor, fecha_order, fecha_ingreso) VALUES (" + id + ", " + noc + ", " + idp + ", '" + fecha_order + "', '" + fecha_ingreso + "');";
+
+            // Modificamos la consulta para usar AUTO_INCREMENT
+            string consulta = "INSERT INTO Compras(no_order_compra, idproveedor, fecha_order, fecha_ingreso) VALUES (" + noc + ", " + idp + ", '" + fecha_order + "', '" + fecha_ingreso + "');";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);
             if (!q_estado) {
                 cout << "Ingreso de Compra Exitoso..." << endl;
-                
-                // Insertar detalles de compra
-                for (DetalleCompra detalle : detalles) {
-                    string idcd = to_string(detalle.idcompra_detalle);
-                    string idprod = to_string(detalle.idproducto);
-                    string cant = to_string(detalle.cantidad);
-                    string pu = to_string(detalle.precio_unitario);
-                    
-                    string consultaDetalle = "INSERT INTO Compras_detalle(idcompra_detalle, idcompra, idproducto, cantidad, precio_unitario) VALUES (" + idcd + ", " + id + ", " + idprod + ", " + cant + ", " + pu + ");";
-                    const char* cd = consultaDetalle.c_str();
-                    q_estado = mysql_query(cn.getConector(), cd);
-                    if (q_estado) {
-                        cout << "xxx Error al ingresar detalle de compra xxx" << endl;
-                        cout << consultaDetalle << endl;
+
+                // Obtener el ID de la compra recién insertada
+                q_estado = mysql_query(cn.getConector(), "SELECT LAST_INSERT_ID();");
+                if (!q_estado) {
+                    MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+                    MYSQL_ROW fila = mysql_fetch_row(resultado);
+                    string id = fila[0];
+
+                    // Insertar detalles de compra
+                    for (DetalleCompra detalle : detalles) {
+                        string idprod = to_string(detalle.idproducto);
+                        string cant = to_string(detalle.cantidad);
+                        string pu = to_string(detalle.precio_unitario);
+
+                        // Modificamos la consulta para usar AUTO_INCREMENT
+                        string consultaDetalle = "INSERT INTO Compras_detalle(idcompra, idproducto, cantidad, precio_unitario) VALUES (" + id + ", " + idprod + ", " + cant + ", " + pu + ");";
+                        const char* cd = consultaDetalle.c_str();
+                        q_estado = mysql_query(cn.getConector(), cd);
+                        if (q_estado) {
+                            cout << "xxx Error al ingresar detalle de compra xxx" << endl;
+                            cout << consultaDetalle << endl;
+                        }
                     }
+
+                    mysql_free_result(resultado);
+                }
+                else {
+                    cout << "xxx Error al obtener ID de la compra xxx" << endl;
                 }
             }
             else {
@@ -168,7 +181,7 @@ public:
             string id = to_string(idcompra);
             string noc = to_string(no_order_compra);
             string idp = to_string(idproveedor);
-            
+
             string consulta = "UPDATE Compras SET no_order_compra = " + noc + ", idproveedor = " + idp + ", fecha_order = '" + fecha_order + "', fecha_ingreso = '" + fecha_ingreso + "' WHERE idcompra = " + id + ";";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);
@@ -192,7 +205,7 @@ public:
         cn.abrir_conexion();
         if (cn.getConector()) {
             string id = to_string(idcompra);
-            
+
             // Primero eliminar los detalles
             string consultaDetalles = "DELETE FROM Compras_detalle WHERE idcompra = " + id + ";";
             const char* cd = consultaDetalles.c_str();

@@ -113,12 +113,8 @@ void ingresarProveedor() {
     limpiarPantalla();
     cout << "===== INGRESAR NUEVO PROVEEDOR =====\n\n";
 
-    int idProveedor = 0;
     string proveedor, nit, direccion, telefono;
 
-    cout << "Ingrese ID de Proveedor: ";
-    cin >> idProveedor;
-    cin.ignore();
     cout << "Ingrese Nombre de Proveedor: ";
     getline(cin, proveedor);
     cout << "Ingrese NIT: ";
@@ -128,7 +124,8 @@ void ingresarProveedor() {
     cout << "Ingrese Teléfono: ";
     getline(cin, telefono);
 
-    Proveedor p = Proveedor(idProveedor, proveedor, nit, direccion, telefono);
+    // Usamos 0 como valor temporal para idProveedor, ya que será generado por la base de datos
+    Proveedor p = Proveedor(0, proveedor, nit, direccion, telefono);
     p.crear();
 
     pausar();
@@ -258,15 +255,11 @@ void ingresarProducto() {
     Marca m = Marca();
     m.leer();
 
-    int idProducto = 0;
     string producto, descripcion, imagen, fecha_ingreso;
     short idMarca = 0;
     double precio_costo = 0.0, precio_venta = 0.0;
     int existencia = 0;
 
-    cout << "\nIngrese ID de Producto: ";
-    cin >> idProducto;
-    cin.ignore();
     cout << "Ingrese Nombre de Producto: ";
     getline(cin, producto);
     cout << "Ingrese ID de Marca: ";
@@ -287,7 +280,8 @@ void ingresarProducto() {
     // Obtener fecha actual para fecha_ingreso
     fecha_ingreso = obtenerFechaHoraActual();
 
-    Producto p = Producto(idProducto, producto, idMarca, descripcion, imagen, precio_costo, precio_venta, existencia, fecha_ingreso);
+    // Usamos 0 como valor temporal para idProducto, ya que será generado por la base de datos
+    Producto p = Producto(0, producto, idMarca, descripcion, imagen, precio_costo, precio_venta, existencia, fecha_ingreso);
     p.crear();
 
     pausar();
@@ -436,15 +430,11 @@ void ingresarEmpleado() {
     Puesto p = Puesto();
     p.leer();
 
-    int idEmpleado = 0;
     string nombres, apellidos, direccion, telefono, DPI, fecha_nacimiento, fecha_inicio_labores, fecha_ingreso;
     bool genero = false;
     short idPuesto = 0;
     char gen;
 
-    cout << "\nIngrese ID de Empleado: ";
-    cin >> idEmpleado;
-    cin.ignore();
     cout << "Ingrese Nombres: ";
     getline(cin, nombres);
     cout << "Ingrese Apellidos: ";
@@ -470,7 +460,8 @@ void ingresarEmpleado() {
     // Obtener fecha actual para fecha_ingreso
     fecha_ingreso = obtenerFechaHoraActual();
 
-    Empleado e = Empleado(idEmpleado, nombres, apellidos, direccion, telefono, DPI, genero, fecha_nacimiento, idPuesto, fecha_inicio_labores, fecha_ingreso);
+    // Usamos 0 como valor temporal para idEmpleado, ya que será generado por la base de datos
+    Empleado e = Empleado(0, nombres, apellidos, direccion, telefono, DPI, genero, fecha_nacimiento, idPuesto, fecha_inicio_labores, fecha_ingreso);
     e.crear();
 
     pausar();
@@ -619,14 +610,10 @@ void ingresarCliente() {
     limpiarPantalla();
     cout << "===== INGRESAR NUEVO CLIENTE =====\n\n";
 
-    int idCliente = 0;
     string nombres, apellidos, NIT, telefono, correo_electronico, fecha_ingreso;
     bool genero = false;
     char gen;
 
-    cout << "Ingrese ID de Cliente: ";
-    cin >> idCliente;
-    cin.ignore();
     cout << "Ingrese Nombres: ";
     getline(cin, nombres);
     cout << "Ingrese Apellidos: ";
@@ -645,7 +632,8 @@ void ingresarCliente() {
     // Obtener fecha actual para fecha_ingreso
     fecha_ingreso = obtenerFechaHoraActual();
 
-    Cliente c = Cliente(idCliente, nombres, apellidos, NIT, genero, telefono, correo_electronico, fecha_ingreso);
+    // Usamos 0 como valor temporal para idCliente, ya que será generado por la base de datos
+    Cliente c = Cliente(0, nombres, apellidos, NIT, genero, telefono, correo_electronico, fecha_ingreso);
     c.crear();
 
     pausar();
@@ -738,6 +726,254 @@ void mostrarDetallesCompra();
 void actualizarCompra();
 void eliminarCompra();
 
+// Funciones para Compra_detalle
+void menuDetallesCompra();
+void ingresarDetalleCompra();
+void mostrarDetallesCompraIndividual();
+void actualizarDetalleCompra();
+void eliminarDetalleCompra();
+
+// Implementación de funciones para Compra_detalle
+void menuDetallesCompra() {
+    int opcion = 0;
+    do {
+        limpiarPantalla();
+        cout << "======================================\n";
+        cout << "    GESTIÓN DE DETALLES DE COMPRA    \n";
+        cout << "======================================\n\n";
+        cout << "1. Ingresar nuevo detalle de compra\n";
+        cout << "2. Mostrar detalles de compra\n";
+        cout << "3. Actualizar detalle de compra\n";
+        cout << "4. Eliminar detalle de compra\n";
+        cout << "0. Volver al menú principal\n\n";
+        cout << "Ingrese una opción: ";
+        cin >> opcion;
+        cin.ignore();
+
+        switch (opcion) {
+            case 1:
+                ingresarDetalleCompra();
+                break;
+            case 2:
+                mostrarDetallesCompraIndividual();
+                break;
+            case 3:
+                actualizarDetalleCompra();
+                break;
+            case 4:
+                eliminarDetalleCompra();
+                break;
+            case 0:
+                // Volver al menú principal
+                break;
+            default:
+                cout << "\nOpción no válida. Intente de nuevo.\n";
+                pausar();
+        }
+    } while (opcion != 0);
+}
+
+void ingresarDetalleCompra() {
+    limpiarPantalla();
+    cout << "===== INGRESAR NUEVO DETALLE DE COMPRA =====\n\n";
+
+    // Mostrar compras disponibles
+    cout << "Compras disponibles:\n";
+    Compra c = Compra();
+    c.leer();
+
+    // Mostrar productos disponibles
+    cout << "\nProductos disponibles:\n";
+    Producto p = Producto();
+    p.leer();
+
+    int idcompra = 0, idproducto = 0, cantidad = 0;
+    double precio_unitario = 0.0;
+
+    cout << "Ingrese ID de Compra: ";
+    cin >> idcompra;
+    cout << "Ingrese ID de Producto: ";
+    cin >> idproducto;
+    cout << "Ingrese Cantidad: ";
+    cin >> cantidad;
+    cout << "Ingrese Precio Unitario: ";
+    cin >> precio_unitario;
+
+    // Crear el detalle de compra directamente en la base de datos
+    int q_estado = 0;
+    ConexionBD cn = ConexionBD();
+    cn.abrir_conexion();
+    if (cn.getConector()) {
+        string idc = to_string(idcompra);
+        string idp = to_string(idproducto);
+        string cant = to_string(cantidad);
+        string pu = to_string(precio_unitario);
+
+        // Modificamos la consulta para usar AUTO_INCREMENT
+        string consulta = "INSERT INTO Compras_detalle(idcompra, idproducto, cantidad, precio_unitario) VALUES (" + idc + ", " + idp + ", " + cant + ", " + pu + ");";
+        const char* c = consulta.c_str();
+        q_estado = mysql_query(cn.getConector(), c);
+        if (!q_estado) {
+            cout << "Ingreso de Detalle de Compra Exitoso..." << endl;
+        }
+        else {
+            cout << "xxx Error al ingresar información xxx" << endl;
+            cout << consulta << endl;
+        }
+    }
+    else {
+        cout << "xxx Error en la conexión xxx" << endl;
+    }
+    cn.cerrar_conexion();
+
+    pausar();
+}
+
+void mostrarDetallesCompraIndividual() {
+    limpiarPantalla();
+    cout << "===== LISTADO DE DETALLES DE COMPRA =====\n\n";
+
+    // Mostrar todas las compras
+    cout << "Compras disponibles:\n";
+    Compra c = Compra();
+    c.leer();
+
+    int idcompra = 0;
+    cout << "\nIngrese el ID de la compra para ver sus detalles: ";
+    cin >> idcompra;
+
+    // Mostrar los detalles de la compra seleccionada
+    c.leerDetalles(idcompra);
+
+    pausar();
+}
+
+void actualizarDetalleCompra() {
+    limpiarPantalla();
+    cout << "===== ACTUALIZAR DETALLE DE COMPRA =====\n\n";
+
+    // Mostrar compras disponibles
+    cout << "Compras disponibles:\n";
+    Compra c = Compra();
+    c.leer();
+
+    int idcompra = 0;
+    cout << "\nIngrese el ID de la compra para ver sus detalles: ";
+    cin >> idcompra;
+
+    // Mostrar los detalles de la compra seleccionada
+    c.leerDetalles(idcompra);
+
+    // Mostrar productos disponibles
+    cout << "\nProductos disponibles:\n";
+    Producto p = Producto();
+    p.leer();
+
+    int idcompra_detalle = 0, idproducto = 0, cantidad = 0;
+    double precio_unitario = 0.0;
+
+    cout << "\nIngrese el ID del detalle de compra a modificar: ";
+    cin >> idcompra_detalle;
+    cout << "Ingrese Nuevo ID de Producto: ";
+    cin >> idproducto;
+    cout << "Ingrese Nueva Cantidad: ";
+    cin >> cantidad;
+    cout << "Ingrese Nuevo Precio Unitario: ";
+    cin >> precio_unitario;
+
+    // Actualizar el detalle de compra directamente en la base de datos
+    int q_estado = 0;
+    ConexionBD cn = ConexionBD();
+    cn.abrir_conexion();
+    if (cn.getConector()) {
+        string idcd = to_string(idcompra_detalle);
+        string idp = to_string(idproducto);
+        string cant = to_string(cantidad);
+        string pu = to_string(precio_unitario);
+
+        string consulta = "UPDATE Compras_detalle SET idproducto = " + idp + ", cantidad = " + cant + ", precio_unitario = " + pu + " WHERE idcompra_detalle = " + idcd + ";";
+        const char* sql = consulta.c_str();
+        q_estado = mysql_query(cn.getConector(), sql);
+        if (!q_estado) {
+            cout << "Actualización de Detalle de Compra Exitosa..." << endl;
+
+            // Mostrar los detalles actualizados
+            cout << "\nDetalles actualizados:\n";
+            Compra compra = Compra();
+            compra.leerDetalles(idcompra);
+        }
+        else {
+            cout << "xxx Error al actualizar información xxx" << endl;
+            cout << consulta << endl;
+        }
+    }
+    else {
+        cout << "xxx Error en la conexión xxx" << endl;
+    }
+    cn.cerrar_conexion();
+
+    pausar();
+}
+
+void eliminarDetalleCompra() {
+    limpiarPantalla();
+    cout << "===== ELIMINAR DETALLE DE COMPRA =====\n\n";
+
+    // Mostrar compras disponibles
+    cout << "Compras disponibles:\n";
+    Compra c = Compra();
+    c.leer();
+
+    int idcompra = 0;
+    cout << "\nIngrese el ID de la compra para ver sus detalles: ";
+    cin >> idcompra;
+
+    // Mostrar los detalles de la compra seleccionada
+    c.leerDetalles(idcompra);
+
+    int idcompra_detalle = 0;
+    cout << "\nIngrese el ID del detalle de compra a eliminar: ";
+    cin >> idcompra_detalle;
+
+    char confirmar;
+    cout << "¿Está seguro de eliminar este detalle? (S/N): ";
+    cin >> confirmar;
+
+    if (confirmar == 'S' || confirmar == 's') {
+        // Eliminar el detalle de compra directamente en la base de datos
+        int q_estado = 0;
+        ConexionBD cn = ConexionBD();
+        cn.abrir_conexion();
+        if (cn.getConector()) {
+            string idcd = to_string(idcompra_detalle);
+
+            string consulta = "DELETE FROM Compras_detalle WHERE idcompra_detalle = " + idcd + ";";
+            const char* sql = consulta.c_str();
+            q_estado = mysql_query(cn.getConector(), sql);
+            if (!q_estado) {
+                cout << "Eliminación de Detalle de Compra Exitosa..." << endl;
+
+                // Mostrar los detalles actualizados
+                cout << "\nDetalles actualizados:\n";
+                Compra compra = Compra();
+                compra.leerDetalles(idcompra);
+            }
+            else {
+                cout << "xxx Error al eliminar información xxx" << endl;
+                cout << consulta << endl;
+            }
+        }
+        else {
+            cout << "xxx Error en la conexión xxx" << endl;
+        }
+        cn.cerrar_conexion();
+    } else {
+        cout << "\nOperación cancelada.\n";
+    }
+
+    pausar();
+}
+
 // Implementación de funciones para Compra
 void menuCompras() {
     int opcion = 0;
@@ -791,11 +1027,9 @@ void ingresarCompra() {
     Proveedor prov = Proveedor();
     prov.leer();
 
-    int idcompra = 0, no_order_compra = 0, idproveedor = 0;
+    int no_order_compra = 0, idproveedor = 0;
     string fecha_order, fecha_ingreso;
 
-    cout << "\nIngrese ID de Compra: ";
-    cin >> idcompra;
     cout << "Ingrese No. de Orden de Compra: ";
     cin >> no_order_compra;
     cout << "Ingrese ID de Proveedor: ";
@@ -807,7 +1041,8 @@ void ingresarCompra() {
     // Obtener fecha actual para fecha_ingreso
     fecha_ingreso = obtenerFechaHoraActual();
 
-    Compra c = Compra(idcompra, no_order_compra, idproveedor, fecha_order, fecha_ingreso);
+    // Usamos 0 como valor temporal para idcompra, ya que será generado por la base de datos
+    Compra c = Compra(0, no_order_compra, idproveedor, fecha_order, fecha_ingreso);
 
     // Agregar detalles de compra
     char agregarDetalle = 'S';
@@ -820,8 +1055,8 @@ void ingresarCompra() {
     while (agregarDetalle == 'S' || agregarDetalle == 's') {
         DetalleCompra detalle;
 
-        cout << "\nIngrese ID de Detalle de Compra: ";
-        cin >> detalle.idcompra_detalle;
+        // Usamos 0 como valor temporal para idcompra_detalle, ya que será generado por la base de datos
+        detalle.idcompra_detalle = 0;
         cout << "Ingrese ID de Producto: ";
         cin >> detalle.idproducto;
         cout << "Ingrese Cantidad: ";
@@ -938,6 +1173,256 @@ void mostrarDetallesVenta();
 void actualizarVenta();
 void eliminarVenta();
 
+// Funciones para Venta_detalle
+void menuDetallesVenta();
+void ingresarDetalleVenta();
+void mostrarDetallesVentaIndividual();
+void actualizarDetalleVenta();
+void eliminarDetalleVenta();
+
+// Implementación de funciones para Venta_detalle
+void menuDetallesVenta() {
+    int opcion = 0;
+    do {
+        limpiarPantalla();
+        cout << "======================================\n";
+        cout << "     GESTIÓN DE DETALLES DE VENTA    \n";
+        cout << "======================================\n\n";
+        cout << "1. Ingresar nuevo detalle de venta\n";
+        cout << "2. Mostrar detalles de venta\n";
+        cout << "3. Actualizar detalle de venta\n";
+        cout << "4. Eliminar detalle de venta\n";
+        cout << "0. Volver al menú principal\n\n";
+        cout << "Ingrese una opción: ";
+        cin >> opcion;
+        cin.ignore();
+
+        switch (opcion) {
+            case 1:
+                ingresarDetalleVenta();
+                break;
+            case 2:
+                mostrarDetallesVentaIndividual();
+                break;
+            case 3:
+                actualizarDetalleVenta();
+                break;
+            case 4:
+                eliminarDetalleVenta();
+                break;
+            case 0:
+                // Volver al menú principal
+                break;
+            default:
+                cout << "\nOpción no válida. Intente de nuevo.\n";
+                pausar();
+        }
+    } while (opcion != 0);
+}
+
+void ingresarDetalleVenta() {
+    limpiarPantalla();
+    cout << "===== INGRESAR NUEVO DETALLE DE VENTA =====\n\n";
+
+    // Mostrar ventas disponibles
+    cout << "Ventas disponibles:\n";
+    Venta v = Venta();
+    v.leer();
+
+    // Mostrar productos disponibles
+    cout << "\nProductos disponibles:\n";
+    Producto p = Producto();
+    p.leer();
+
+    int idventa = 0, idProducto = 0;
+    string cantidad;
+    double precio_unitario = 0.0;
+
+    cout << "Ingrese ID de Venta: ";
+    cin >> idventa;
+    cout << "Ingrese ID de Producto: ";
+    cin >> idProducto;
+    cin.ignore();
+    cout << "Ingrese Cantidad: ";
+    getline(cin, cantidad);
+    cout << "Ingrese Precio Unitario: ";
+    cin >> precio_unitario;
+
+    // Crear el detalle de venta directamente en la base de datos
+    int q_estado = 0;
+    ConexionBD cn = ConexionBD();
+    cn.abrir_conexion();
+    if (cn.getConector()) {
+        string idv = to_string(idventa);
+        string idp = to_string(idProducto);
+        string pu = to_string(precio_unitario);
+
+        // Modificamos la consulta para usar AUTO_INCREMENT
+        string consulta = "INSERT INTO Ventas_detalle(idventa, idProducto, cantidad, precio_unitario) VALUES (" + idv + ", " + idp + ", '" + cantidad + "', " + pu + ");";
+        const char* c = consulta.c_str();
+        q_estado = mysql_query(cn.getConector(), c);
+        if (!q_estado) {
+            cout << "Ingreso de Detalle de Venta Exitoso..." << endl;
+        }
+        else {
+            cout << "xxx Error al ingresar información xxx" << endl;
+            cout << consulta << endl;
+        }
+    }
+    else {
+        cout << "xxx Error en la conexión xxx" << endl;
+    }
+    cn.cerrar_conexion();
+
+    pausar();
+}
+
+void mostrarDetallesVentaIndividual() {
+    limpiarPantalla();
+    cout << "===== LISTADO DE DETALLES DE VENTA =====\n\n";
+
+    // Mostrar todas las ventas
+    cout << "Ventas disponibles:\n";
+    Venta v = Venta();
+    v.leer();
+
+    int idventa = 0;
+    cout << "\nIngrese el ID de la venta para ver sus detalles: ";
+    cin >> idventa;
+
+    // Mostrar los detalles de la venta seleccionada
+    v.leerDetalles(idventa);
+
+    pausar();
+}
+
+void actualizarDetalleVenta() {
+    limpiarPantalla();
+    cout << "===== ACTUALIZAR DETALLE DE VENTA =====\n\n";
+
+    // Mostrar ventas disponibles
+    cout << "Ventas disponibles:\n";
+    Venta v = Venta();
+    v.leer();
+
+    int idventa = 0;
+    cout << "\nIngrese el ID de la venta para ver sus detalles: ";
+    cin >> idventa;
+
+    // Mostrar los detalles de la venta seleccionada
+    v.leerDetalles(idventa);
+
+    // Mostrar productos disponibles
+    cout << "\nProductos disponibles:\n";
+    Producto p = Producto();
+    p.leer();
+
+    int idventa_detalle = 0, idProducto = 0;
+    string cantidad;
+    double precio_unitario = 0.0;
+
+    cout << "\nIngrese el ID del detalle de venta a modificar: ";
+    cin >> idventa_detalle;
+    cout << "Ingrese Nuevo ID de Producto: ";
+    cin >> idProducto;
+    cin.ignore();
+    cout << "Ingrese Nueva Cantidad: ";
+    getline(cin, cantidad);
+    cout << "Ingrese Nuevo Precio Unitario: ";
+    cin >> precio_unitario;
+
+    // Actualizar el detalle de venta directamente en la base de datos
+    int q_estado = 0;
+    ConexionBD cn = ConexionBD();
+    cn.abrir_conexion();
+    if (cn.getConector()) {
+        string idvd = to_string(idventa_detalle);
+        string idp = to_string(idProducto);
+        string pu = to_string(precio_unitario);
+
+        string consulta = "UPDATE Ventas_detalle SET idProducto = " + idp + ", cantidad = '" + cantidad + "', precio_unitario = " + pu + " WHERE idventa_detalle = " + idvd + ";";
+        const char* sql = consulta.c_str();
+        q_estado = mysql_query(cn.getConector(), sql);
+        if (!q_estado) {
+            cout << "Actualización de Detalle de Venta Exitosa..." << endl;
+
+            // Mostrar los detalles actualizados
+            cout << "\nDetalles actualizados:\n";
+            Venta venta = Venta();
+            venta.leerDetalles(idventa);
+        }
+        else {
+            cout << "xxx Error al actualizar información xxx" << endl;
+            cout << consulta << endl;
+        }
+    }
+    else {
+        cout << "xxx Error en la conexión xxx" << endl;
+    }
+    cn.cerrar_conexion();
+
+    pausar();
+}
+
+void eliminarDetalleVenta() {
+    limpiarPantalla();
+    cout << "===== ELIMINAR DETALLE DE VENTA =====\n\n";
+
+    // Mostrar ventas disponibles
+    cout << "Ventas disponibles:\n";
+    Venta v = Venta();
+    v.leer();
+
+    int idventa = 0;
+    cout << "\nIngrese el ID de la venta para ver sus detalles: ";
+    cin >> idventa;
+
+    // Mostrar los detalles de la venta seleccionada
+    v.leerDetalles(idventa);
+
+    int idventa_detalle = 0;
+    cout << "\nIngrese el ID del detalle de venta a eliminar: ";
+    cin >> idventa_detalle;
+
+    char confirmar;
+    cout << "¿Está seguro de eliminar este detalle? (S/N): ";
+    cin >> confirmar;
+
+    if (confirmar == 'S' || confirmar == 's') {
+        // Eliminar el detalle de venta directamente en la base de datos
+        int q_estado = 0;
+        ConexionBD cn = ConexionBD();
+        cn.abrir_conexion();
+        if (cn.getConector()) {
+            string idvd = to_string(idventa_detalle);
+
+            string consulta = "DELETE FROM Ventas_detalle WHERE idventa_detalle = " + idvd + ";";
+            const char* sql = consulta.c_str();
+            q_estado = mysql_query(cn.getConector(), sql);
+            if (!q_estado) {
+                cout << "Eliminación de Detalle de Venta Exitosa..." << endl;
+
+                // Mostrar los detalles actualizados
+                cout << "\nDetalles actualizados:\n";
+                Venta venta = Venta();
+                venta.leerDetalles(idventa);
+            }
+            else {
+                cout << "xxx Error al eliminar información xxx" << endl;
+                cout << consulta << endl;
+            }
+        }
+        else {
+            cout << "xxx Error en la conexión xxx" << endl;
+        }
+        cn.cerrar_conexion();
+    } else {
+        cout << "\nOperación cancelada.\n";
+    }
+
+    pausar();
+}
+
 // Implementación de funciones para Venta
 void menuVentas() {
     int opcion = 0;
@@ -996,12 +1481,10 @@ void ingresarVenta() {
     Empleado e = Empleado();
     e.leer();
 
-    int idVenta = 0, nofactura = 0, idcliente = 0, idempleado = 0;
+    int nofactura = 0, idcliente = 0, idempleado = 0;
     char serie;
     string fechafactura, fecha_ingreso;
 
-    cout << "\nIngrese ID de Venta: ";
-    cin >> idVenta;
     cout << "Ingrese No. de Factura: ";
     cin >> nofactura;
     cout << "Ingrese Serie (A-Z): ";
@@ -1017,7 +1500,8 @@ void ingresarVenta() {
     // Obtener fecha actual para fecha_ingreso
     fecha_ingreso = obtenerFechaHoraActual();
 
-    Venta v = Venta(idVenta, nofactura, serie, fechafactura, idcliente, idempleado, fecha_ingreso);
+    // Usamos 0 como valor temporal para idVenta, ya que será generado por la base de datos
+    Venta v = Venta(0, nofactura, serie, fechafactura, idcliente, idempleado, fecha_ingreso);
 
     // Agregar detalles de venta
     char agregarDetalle = 'S';
@@ -1030,8 +1514,8 @@ void ingresarVenta() {
     while (agregarDetalle == 'S' || agregarDetalle == 's') {
         DetalleVenta detalle;
 
-        cout << "\nIngrese ID de Detalle de Venta: ";
-        cin >> detalle.idventa_detalle;
+        // Usamos 0 como valor temporal para idventa_detalle, ya que será generado por la base de datos
+        detalle.idventa_detalle = 0;
         cout << "Ingrese ID de Producto: ";
         cin >> detalle.idProducto;
         cin.ignore();
@@ -1197,16 +1681,13 @@ void ingresarMarca() {
     limpiarPantalla();
     cout << "===== INGRESAR NUEVA MARCA =====\n\n";
 
-    short idmarca = 0;
     string marca;
 
-    cout << "Ingrese ID de Marca: ";
-    cin >> idmarca;
-    cin.ignore();
     cout << "Ingrese Nombre de Marca: ";
     getline(cin, marca);
 
-    Marca m = Marca(idmarca, marca);
+    // Usamos 0 como valor temporal para idmarca, ya que será generado por la base de datos
+    Marca m = Marca(0, marca);
     m.crear();
 
     pausar();
@@ -1318,16 +1799,13 @@ void ingresarPuesto() {
     limpiarPantalla();
     cout << "===== INGRESAR NUEVO PUESTO =====\n\n";
 
-    short idPuesto = 0;
     string puesto;
 
-    cout << "Ingrese ID de Puesto: ";
-    cin >> idPuesto;
-    cin.ignore();
     cout << "Ingrese Nombre de Puesto: ";
     getline(cin, puesto);
 
-    Puesto p = Puesto(idPuesto, puesto);
+    // Usamos 0 como valor temporal para idPuesto, ya que será generado por la base de datos
+    Puesto p = Puesto(0, puesto);
     p.crear();
 
     pausar();
@@ -1415,7 +1893,9 @@ int main() {
         cout << "5. Gestión de Empleados\n";
         cout << "6. Gestión de Clientes\n";
         cout << "7. Gestión de Compras\n";
-        cout << "8. Gestión de Ventas\n";
+        cout << "8. Gestión de Detalles de Compras\n";
+        cout << "9. Gestión de Ventas\n";
+        cout << "10. Gestión de Detalles de Ventas\n";
         cout << "0. Salir\n\n";
         cout << "Ingrese una opción: ";
         cin >> opcion;
@@ -1444,7 +1924,13 @@ int main() {
                 menuCompras();
                 break;
             case 8:
+                menuDetallesCompra();
+                break;
+            case 9:
                 menuVentas();
+                break;
+            case 10:
+                menuDetallesVenta();
                 break;
             case 0:
                 cout << "\nGracias por usar el sistema. ¡Hasta pronto!\n";

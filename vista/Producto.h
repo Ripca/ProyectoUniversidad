@@ -61,13 +61,13 @@ public:
         ConexionBD cn = ConexionBD();
         cn.abrir_conexion();
         if (cn.getConector()) {
-            string id = to_string(idProducto);
             string idM = to_string(idMarca);
             string pc = to_string(precio_costo);
             string pv = to_string(precio_venta);
             string exist = to_string(existencia);
-            
-            string consulta = "INSERT INTO Productos(idProducto, producto, idMarca, descripcion, imagen, precio_costo, precio_venta, existencia, fecha_ingreso) VALUES (" + id + ", '" + producto + "', " + idM + ", '" + descripcion + "', '" + imagen + "', " + pc + ", " + pv + ", " + exist + ", '" + fecha_ingreso + "');";
+
+            // Modificamos la consulta para usar AUTO_INCREMENT
+            string consulta = "INSERT INTO Productos(producto, idMarca, descripcion, imagen, precio_costo, precio_venta, existencia, fecha_ingreso) VALUES ('" + producto + "', " + idM + ", '" + descripcion + "', '" + imagen + "', " + pc + ", " + pv + ", " + exist + ", '" + fecha_ingreso + "');";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);
             if (!q_estado) {
@@ -124,7 +124,7 @@ public:
             string pc = to_string(precio_costo);
             string pv = to_string(precio_venta);
             string exist = to_string(existencia);
-            
+
             string consulta = "UPDATE Productos SET producto = '" + producto + "', idMarca = " + idM + ", descripcion = '" + descripcion + "', imagen = '" + imagen + "', precio_costo = " + pc + ", precio_venta = " + pv + ", existencia = " + exist + ", fecha_ingreso = '" + fecha_ingreso + "' WHERE idProducto = " + id + ";";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);

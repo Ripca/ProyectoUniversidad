@@ -33,8 +33,8 @@ public:
         ConexionBD cn = ConexionBD();
         cn.abrir_conexion();
         if (cn.getConector()) {
-            string id = to_string(idmarca);
-            string consulta = "INSERT INTO Marcas(idmarca, marca) VALUES (" + id + ", '" + marca + "');";
+            // Modificamos la consulta para usar AUTO_INCREMENT
+            string consulta = "INSERT INTO Marcas(marca) VALUES ('" + marca + "');";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);
             if (!q_estado) {
