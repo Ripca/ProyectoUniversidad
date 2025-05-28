@@ -61,11 +61,18 @@ public:
     vector<DetalleVenta> getDetalles() { return detalles; }
 
     // Métodos CRUD
-    void crear() {
+    int crearVenta() {
         int q_estado = 0;
+        int idVentaCreada = 0;
         ConexionBD cn = ConexionBD();
         cn.abrir_conexion();
-        if (cn.getConector()) {
+
+        if (!cn.getConector()) {
+            cout << "Error en la conexion a la base de datos" << endl;
+            return 0;
+        }
+
+        try {
             string nf = to_string(nofactura);
             string s(1, serie);
             string idc = to_string(idcliente);
@@ -75,6 +82,7 @@ public:
             string consulta = "INSERT INTO Ventas(nofactura, serie, fechafactura, idcliente, idempleado, fecha_ingreso) VALUES (" + nf + ", '" + s + "', '" + fechafactura + "', " + idc + ", " + ide + ", '" + fecha_ingreso + "');";
             const char* c = consulta.c_str();
             q_estado = mysql_query(cn.getConector(), c);
+
             if (!q_estado) {
                 cout << "Ingreso de Venta Exitoso..." << endl;
 
@@ -82,39 +90,70 @@ public:
                 q_estado = mysql_query(cn.getConector(), "SELECT LAST_INSERT_ID();");
                 if (!q_estado) {
                     MYSQL_RES* resultado = mysql_store_result(cn.getConector());
-                    MYSQL_ROW fila = mysql_fetch_row(resultado);
-                    string id = fila[0];
+                    if (resultado) {
+                        MYSQL_ROW fila = mysql_fetch_row(resultado);
+                        if (fila) {
+                            idVentaCreada = atoi(fila[0]);
+                            string id = fila[0];
 
-                    // Insertar detalles de venta
-                    for (DetalleVenta detalle : detalles) {
-                        string idprod = to_string(detalle.idProducto);
-                        string pu = to_string(detalle.precio_unitario);
+                            // Insertar detalles de venta
+                            bool todosDetallesExitosos = true;
+                            for (DetalleVenta detalle : detalles) {
+                                string idprod = to_string(detalle.idProducto);
+                                string pu = to_string(detalle.precio_unitario);
 
-                        // Modificamos la consulta para usar AUTO_INCREMENT
-                        string consultaDetalle = "INSERT INTO Ventas_detalle(idventa, idProducto, cantidad, precio_unitario) VALUES (" + id + ", " + idprod + ", '" + detalle.cantidad + "', " + pu + ");";
-                        const char* cd = consultaDetalle.c_str();
-                        q_estado = mysql_query(cn.getConector(), cd);
-                        if (q_estado) {
-                            cout << "xxx Error al ingresar detalle de venta xxx" << endl;
-                            cout << consultaDetalle << endl;
+                                // Modificamos la consulta para usar AUTO_INCREMENT
+                                string consultaDetalle = "INSERT INTO Ventas_detalle(idventa, idProducto, cantidad, precio_unitario) VALUES (" + id + ", " + idprod + ", '" + detalle.cantidad + "', " + pu + ");";
+                                const char* cd = consultaDetalle.c_str();
+                                q_estado = mysql_query(cn.getConector(), cd);
+                                if (q_estado) {
+                                    cout << "Error al ingresar detalle de venta" << endl;
+                                    cout << "Error MySQL: " << mysql_error(cn.getConector()) << endl;
+                                    cout << "Consulta: " << consultaDetalle << endl;
+                                    todosDetallesExitosos = false;
+                                }
+                            }
+
+                            if (!todosDetallesExitosos) {
+                                cout << "Algunos detalles no se pudieron insertar correctamente." << endl;
+                            }
                         }
+                        mysql_free_result(resultado);
                     }
+                } else {
+                    cout << "Error al obtener ID de la venta: " << mysql_error(cn.getConector()) << endl;
+                }
+            } else {
+                cout << "Error al ingresar informacion de venta" << endl;
+                cout << "Error MySQL: " << mysql_error(cn.getConector()) << endl;
+                cout << "Codigo de error: " << mysql_errno(cn.getConector()) << endl;
 
-                    mysql_free_result(resultado);
+                // Mostrar errores comunes de manera amigable
+                int codigoError = mysql_errno(cn.getConector());
+                switch (codigoError) {
+                    case 1062:
+                        cout << "Causa probable: Numero de factura duplicado." << endl;
+                        break;
+                    case 1452:
+                        cout << "Causa probable: Cliente o empleado no valido." << endl;
+                        break;
+                    default:
+                        cout << "Consulte con el administrador del sistema." << endl;
+                        break;
                 }
-                else {
-                    cout << "xxx Error al obtener ID de la venta xxx" << endl;
-                }
+                cout << "Consulta: " << consulta << endl;
             }
-            else {
-                cout << "xxx Error al ingresar información xxx" << endl;
-                cout << consulta << endl;
-            }
+        } catch (const exception& e) {
+            cout << "Error inesperado: " << e.what() << endl;
         }
-        else {
-            cout << "xxx Error en la conexión xxx" << endl;
-        }
+
         cn.cerrar_conexion();
+        return idVentaCreada;
+    }
+
+    // Método de compatibilidad
+    int crear() {
+        return crearVenta();
     }
 
     void leer() {

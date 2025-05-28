@@ -86,6 +86,7 @@ void eliminarEmpleado();
 // Funciones para Cliente
 void menuClientes();
 void ingresarCliente();
+void ingresarClienteConNIT(const string& nitPreestablecido);
 void mostrarClientes();
 void actualizarCliente();
 void eliminarCliente();
@@ -121,12 +122,23 @@ void buscarClientePorNIT();
 void imprimirFactura();
 string generarCorrelativoFactura();
 string validarFormatoNIT(string nit);
+string validarFormatoNITParaBusqueda(string nit);
+void generarFacturaVentaPDF(int idVenta);
 
 // Funciones adicionales para Compras
 string generarNumeroOrdenCompra();
 void generarFacturaCompra(int idcompra);
 string formatearMoneda(double cantidad);
 void generarFacturaPDF(int idcompra);
+
+// Funciones de validación y manejo de errores
+int validarEnteroPositivo(const string& mensaje, int minimo = 1);
+double validarDecimalPositivo(const string& mensaje, double minimo = 0.01);
+string validarTextoNoVacio(const string& mensaje);
+string validarFecha(const string& mensaje);
+void manejarErrorBD(const string& operacion, const string& consulta, MYSQL* conector);
+bool confirmarOperacion(const string& mensaje);
+int validarOpcionMenu(const string& mensaje, int minimo = 0, int maximo = 10);
 
 // Implementación de funciones para Proveedor
 void menuProveedores() {
@@ -141,9 +153,7 @@ void menuProveedores() {
         cout << "3. Actualizar proveedor\n";
         cout << "4. Eliminar proveedor\n";
         cout << "0. Volver al menú principal\n\n";
-        cout << "Ingrese una opción: ";
-        cin >> opcion;
-        cin.ignore();
+        opcion = validarOpcionMenu("Ingrese una opcion: ", 0, 4);
 
         switch (opcion) {
             case 1:
@@ -273,9 +283,7 @@ void menuProductos() {
         cout << "3. Actualizar producto\n";
         cout << "4. Eliminar producto\n";
         cout << "0. Volver al menú principal\n\n";
-        cout << "Ingrese una opción: ";
-        cin >> opcion;
-        cin.ignore();
+        opcion = validarOpcionMenu("Ingrese una opcion: ", 0, 4);
 
         switch (opcion) {
             case 1:
@@ -443,9 +451,7 @@ void menuEmpleados() {
         cout << "3. Actualizar empleado\n";
         cout << "4. Eliminar empleado\n";
         cout << "0. Volver al menú principal\n\n";
-        cout << "Ingrese una opción: ";
-        cin >> opcion;
-        cin.ignore();
+        opcion = validarOpcionMenu("Ingrese una opcion: ", 0, 4);
 
         switch (opcion) {
             case 1:
@@ -624,9 +630,7 @@ void menuClientes() {
         cout << "4. Actualizar cliente\n";
         cout << "5. Eliminar cliente\n";
         cout << "0. Volver al menú principal\n\n";
-        cout << "Ingrese una opción: ";
-        cin >> opcion;
-        cin.ignore();
+        opcion = validarOpcionMenu("Ingrese una opcion: ", 0, 5);
 
         switch (opcion) {
             case 1:
@@ -684,6 +688,37 @@ void ingresarCliente() {
     Cliente c = Cliente(0, nombres, apellidos, NIT, genero, telefono, correo_electronico, fecha_ingreso);
     c.crear();
 
+    pausar();
+}
+
+void ingresarClienteConNIT(const string& nitPreestablecido) {
+    limpiarPantalla();
+    cout << "===== CREAR NUEVO CLIENTE =====\n\n";
+    cout << "NIT: " << nitPreestablecido<<" \n";
+
+    string nombres, apellidos, telefono, correo_electronico, fecha_ingreso;
+    bool genero = false;
+    char gen;
+
+    nombres = validarTextoNoVacio("Ingrese Nombres: ");
+    apellidos = validarTextoNoVacio("Ingrese Apellidos: ");
+
+    cout << "Ingrese Genero (M/F): ";
+    cin >> gen;
+    genero = (gen == 'M' || gen == 'm') ? true : false;
+    cin.ignore();
+
+    telefono = validarTextoNoVacio("Ingrese Telefono: ");
+    correo_electronico = validarTextoNoVacio("Ingrese Correo Electronico: ");
+
+    // Obtener fecha actual para fecha_ingreso
+    fecha_ingreso = obtenerFechaHoraActual();
+
+    // Usamos 0 como valor temporal para idCliente, ya que será generado por la base de datos
+    Cliente c = Cliente(0, nombres, apellidos, nitPreestablecido, genero, telefono, correo_electronico, fecha_ingreso);
+    c.crear();
+
+    cout << "\nCliente creado exitosamente con NIT: " << nitPreestablecido << endl;
     pausar();
 }
 
@@ -798,9 +833,7 @@ void menuCompras() {
         cout << "6. Gestionar detalles de compra\n";
         cout << "7. Generar factura de compra\n";
         cout << "0. Volver al menú principal\n\n";
-        cout << "Ingrese una opción: ";
-        cin >> opcion;
-        cin.ignore();
+        opcion = validarOpcionMenu("Ingrese una opcion: ", 0, 7);
 
         switch (opcion) {
             case 1:
@@ -848,85 +881,110 @@ void ingresarCompra() {
     limpiarPantalla();
     cout << "===== INGRESAR NUEVA COMPRA =====\n\n";
 
-    // Mostrar proveedores disponibles
-    cout << "Proveedores disponibles:\n";
-    Proveedor prov = Proveedor();
-    prov.leer();
+    try {
+        // Mostrar proveedores disponibles
+        cout << "PROVEEDORES DISPONIBLES:\n";
+        Proveedor prov = Proveedor();
+        prov.leer();
 
-    int idproveedor = 0;
-    string fecha_order, fecha_ingreso;
+        int idproveedor = validarEnteroPositivo("\nIngrese ID de Proveedor: ");
+        string fecha_order, fecha_ingreso;
 
-    // Generar número de orden de compra automáticamente
-    string numeroOrden = generarNumeroOrdenCompra();
-    int no_order_compra = stoi(numeroOrden);
+        // Generar número de orden de compra automáticamente
+        string numeroOrden = generarNumeroOrdenCompra();
+        int no_order_compra = stoi(numeroOrden);
 
-    cout << "\nNúmero de orden de compra generado automáticamente: " << no_order_compra << endl;
+        cout << "\nINFORMACION DE LA COMPRA:\n";
+        cout << "Numero de orden de compra generado automaticamente: " << no_order_compra << endl;
 
-    cout << "Ingrese ID de Proveedor: ";
-    cin >> idproveedor;
-    cin.ignore();
-    cout << "Ingrese Fecha de Orden (YYYY-MM-DD): ";
-    getline(cin, fecha_order);
+        fecha_order = validarFecha("Ingrese Fecha de Orden (YYYY-MM-DD): ");
 
-    // Obtener fecha actual para fecha_ingreso
-    fecha_ingreso = obtenerFechaHoraActual();
+        // Obtener fecha actual para fecha_ingreso
+        fecha_ingreso = obtenerFechaHoraActual();
 
-    // Usamos 0 como valor temporal para idcompra, ya que será generado por la base de datos
-    Compra c = Compra(0, no_order_compra, idproveedor, fecha_order, fecha_ingreso);
+        // Usamos 0 como valor temporal para idcompra, ya que será generado por la base de datos
+        Compra c = Compra(0, no_order_compra, idproveedor, fecha_order, fecha_ingreso);
 
-    // Agregar detalles de compra
-    char agregarDetalle = 'S';
+        // Agregar detalles de compra con validaciones
+        char agregarDetalle = 'S';
+        bool primerDetalle = true;
 
-    // Mostrar productos disponibles
-    cout << "\nProductos disponibles:\n";
-    Producto prod = Producto();
-    prod.leer();
+        while (agregarDetalle == 'S' || agregarDetalle == 's') {
+            if (primerDetalle) {
+                cout << "\nPRODUCTOS DISPONIBLES:\n";
+                Producto prod = Producto();
+                prod.leer();
+                primerDetalle = false;
+            }
 
-    while (agregarDetalle == 'S' || agregarDetalle == 's') {
-        DetalleCompra detalle;
+            cout << "\n--- AGREGAR DETALLE DE COMPRA ---\n";
+            DetalleCompra detalle;
 
-        // Usamos 0 como valor temporal para idcompra_detalle, ya que será generado por la base de datos
-        detalle.idcompra_detalle = 0;
-        cout << "Ingrese ID de Producto: ";
-        cin >> detalle.idproducto;
-        cout << "Ingrese Cantidad: ";
-        cin >> detalle.cantidad;
+            // Usamos 0 como valor temporal para idcompra_detalle, ya que será generado por la base de datos
+            detalle.idcompra_detalle = 0;
+            detalle.idproducto = validarEnteroPositivo("Ingrese ID de Producto: ");
+            detalle.cantidad = validarEnteroPositivo("Ingrese Cantidad: ");
 
-        // Obtener precio de costo automáticamente de la base de datos
-        ConexionBD cn = ConexionBD();
-        cn.abrir_conexion();
-        if (cn.getConector()) {
+            // Obtener precio de costo automáticamente de la base de datos
+            ConexionBD cn = ConexionBD();
+            cn.abrir_conexion();
+            if (!cn.getConector()) {
+                cout << "Error de conexion a la base de datos.\n";
+                pausar();
+                return;
+            }
+
             string consulta = "SELECT precio_costo, producto FROM Productos WHERE idProducto = " + to_string(detalle.idproducto) + ";";
             const char* sql = consulta.c_str();
-            mysql_query(cn.getConector(), sql);
-            MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+            int q_estado = mysql_query(cn.getConector(), sql);
 
+            if (q_estado) {
+                manejarErrorBD("Buscar producto", consulta, cn.getConector());
+                cn.cerrar_conexion();
+                continue; // Continuar con el siguiente detalle
+            }
+
+            MYSQL_RES* resultado = mysql_store_result(cn.getConector());
             if (resultado) {
                 MYSQL_ROW fila = mysql_fetch_row(resultado);
                 if (fila) {
                     detalle.precio_unitario = atof(fila[0]);
-                    cout << "Producto: " << fila[1] << " - Precio de costo: Q" << detalle.precio_unitario << endl;
+                    double subtotal = detalle.cantidad * detalle.precio_unitario;
+                    cout << "Producto: " << fila[1] << "\n";
+                    cout << "Precio de costo:" << formatearMoneda(detalle.precio_unitario) << "\n";
+                    cout << "Subtotal: " << formatearMoneda(subtotal) << "\n";
                 } else {
-                    cout << "Producto no encontrado. Usando precio 0.00" << endl;
-                    detalle.precio_unitario = 0.0;
+                    cout << "Producto no encontrado con ID: " << detalle.idproducto << "\n";
+                    mysql_free_result(resultado);
+                    cn.cerrar_conexion();
+                    continue; // Continuar con el siguiente detalle
                 }
                 mysql_free_result(resultado);
             }
+            cn.cerrar_conexion();
+
+            c.agregarDetalle(detalle);
+
+            cout << "\n¿Desea agregar otro detalle? (S/N): ";
+            cin >> agregarDetalle;
+            cin.ignore();
         }
-        cn.cerrar_conexion();
 
-        c.agregarDetalle(detalle);
+        // Crear la compra y obtener el ID generado
+        cout << "\nGuardando compra...\n";
+        int idCompraCreada = c.crear();
 
-        cout << "\n¿Desea agregar otro detalle? (S/N): ";
-        cin >> agregarDetalle;
-    }
+        // Generar factura PDF automáticamente si la compra fue exitosa
+        if (idCompraCreada > 0) {
+            cout << "\nCompra creada exitosamente!\n";
+            cout << "Generando factura de compra en PDF...\n";
+            generarFacturaPDF(idCompraCreada);
+        } else {
+            cout << "Error al crear la compra. No se generara PDF.\n";
+        }
 
-    int idCompraCreada = c.crear();
-
-    // Generar factura automáticamente si la compra fue exitosa
-    if (idCompraCreada > 0) {
-        cout << "\nGenerando factura de compra en PDF...\n";
-        generarFacturaPDF(idCompraCreada);
+    } catch (const exception& e) {
+        cout << "Error inesperado: " << e.what() << "\n";
     }
 
     pausar();
@@ -949,9 +1007,7 @@ void mostrarDetallesCompra() {
     Compra c = Compra();
     c.leer();
 
-    int idcompra = 0;
-    cout << "\nIngrese el ID de la compra para ver detalles: ";
-    cin >> idcompra;
+    int idcompra = validarEnteroPositivo("\nIngrese el ID de la compra para ver detalles: ");
 
     c.leerDetalles(idcompra);
 
@@ -1002,21 +1058,15 @@ void eliminarCompra() {
     Compra c = Compra();
     c.leer();
 
-    int idcompra = 0;
-    cout << "\nIngrese el ID de la compra a eliminar: ";
-    cin >> idcompra;
+    int idcompra = validarEnteroPositivo("\nIngrese el ID de la compra a eliminar: ");
 
-    char confirmar;
-    cout << "¿Está seguro de eliminar este registro y todos sus detalles? (S/N): ";
-    cin >> confirmar;
-
-    if (confirmar == 'S' || confirmar == 's') {
+    if (confirmarOperacion("¿Está seguro de eliminar este registro y todos sus detalles?")) {
         c.setIdCompra(idcompra);
         c.eliminar();
         cout << "\nRegistro eliminado. Lista actualizada:\n";
         c.leer();
     } else {
-        cout << "\nOperación cancelada.\n";
+        cout << "\nOperacion cancelada.\n";
     }
 
     pausar();
@@ -1040,10 +1090,9 @@ void menuVentas() {
         cout << "6. Gestionar detalles de venta\n";
         cout << "7. Buscar cliente por NIT\n";
         cout << "8. Imprimir factura\n";
+        cout << "9. Generar factura PDF\n";
         cout << "0. Volver al menú principal\n\n";
-        cout << "Ingrese una opción: ";
-        cin >> opcion;
-        cin.ignore();
+        opcion = validarOpcionMenu("Ingrese una opcion: ", 0, 9);
 
         switch (opcion) {
             case 1:
@@ -1070,6 +1119,17 @@ void menuVentas() {
             case 8:
                 imprimirFactura();
                 break;
+            case 9:
+                {
+                    limpiarPantalla();
+                    cout << "===== GENERAR FACTURA PDF DE VENTA =====\n\n";
+                    Venta v = Venta();
+                    v.leer();
+                    int idVenta = validarEnteroPositivo("\nIngrese el ID de la venta para generar factura PDF: ");
+                    generarFacturaVentaPDF(idVenta);
+                    pausar();
+                }
+                break;
             case 0:
                 // Volver al menú principal
                 break;
@@ -1084,121 +1144,273 @@ void ingresarVenta() {
     limpiarPantalla();
     cout << "===== INGRESAR NUEVA VENTA =====\n\n";
 
-    // Buscar cliente por NIT
-    string nitCliente;
-    int idcliente = 0;
-    cout << "Ingrese el NIT del cliente: ";
-    getline(cin, nitCliente);
+    try {
+        // Buscar cliente por NIT con validación mejorada
+        string nitCliente;
+        int idcliente = 0;
+        bool clienteEncontrado = false;
 
-    // Validar y buscar cliente
-    string nitValidado = validarFormatoNIT(nitCliente);
-    if (nitValidado.empty()) {
-        cout << "Formato de NIT inválido.\n";
-        pausar();
-        return;
-    }
+        do {
+            cout << "\n=== BUSQUEDA DE CLIENTE ===\n";
+            cout << "Ingrese el NIT del cliente\n";
+            cout << "(Si no tiene NIT, ingrese: C/F para consumidor final)\n";
+            nitCliente = validarTextoNoVacio("NIT del cliente: ");
 
-    ConexionBD cn = ConexionBD();
-    cn.abrir_conexion();
-    if (cn.getConector()) {
-        string consulta = "SELECT idCliente, nombres, apellidos FROM Clientes WHERE NIT = '" + nitValidado + "';";
-        const char* sql = consulta.c_str();
-        mysql_query(cn.getConector(), sql);
-        MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+            // Validar y buscar cliente
+            string nitValidado = validarFormatoNIT(nitCliente);
+            if (nitValidado.empty()) {
+                cout << "\nFormato de NIT invalido. Intente nuevamente.\n";
+                cout << "Formatos validos:\n";
+                cout << "- NIT: 8 a 13 digitos (ej: 12345678, 1234567890123)\n";
+                cout << "- Consumidor final: C/F\n\n";
+                continue;
+            }
 
-        if (resultado) {
-            MYSQL_ROW fila = mysql_fetch_row(resultado);
-            if (fila) {
-                idcliente = atoi(fila[0]);
-                cout << "Cliente encontrado: " << fila[1] << " " << fila[2] << endl;
-            } else {
-                cout << "Cliente no encontrado. Debe crear el cliente primero.\n";
-                mysql_free_result(resultado);
+            // Caso especial para consumidor final (C/F)
+            if (nitValidado == "C/F") {
+                cout << "Consumidor final detectado. Creando cliente con NIT: C/F\n";
+
+                // Crear cliente automáticamente para consumidor final
+                ingresarClienteConNIT(nitValidado);
+
+                // Buscar el cliente recién creado
+                ConexionBD cn = ConexionBD();
+                cn.abrir_conexion();
+                if (cn.getConector()) {
+                    string consultaBuscar = "SELECT idCliente, nombres, apellidos FROM Clientes WHERE NIT = 'C/F' ORDER BY idCliente DESC LIMIT 1;";
+                    int q_estado_buscar = mysql_query(cn.getConector(), consultaBuscar.c_str());
+                    if (!q_estado_buscar) {
+                        MYSQL_RES* resultadoBuscar = mysql_store_result(cn.getConector());
+                        if (resultadoBuscar) {
+                            MYSQL_ROW filaBuscar = mysql_fetch_row(resultadoBuscar);
+                            if (filaBuscar) {
+                                idcliente = atoi(filaBuscar[0]);
+                                cout << "\nCliente consumidor final creado: " << filaBuscar[1] << " " << filaBuscar[2] << endl;
+                                clienteEncontrado = true;
+                            }
+                            mysql_free_result(resultadoBuscar);
+                        }
+                    }
+                    cn.cerrar_conexion();
+                }
+
+                if (!clienteEncontrado) {
+                    cout << "Error al crear el cliente consumidor final. Intente nuevamente.\n";
+                }
+                continue; // Continuar con el bucle
+            }
+
+            // Para NITs normales, buscar en la base de datos
+            ConexionBD cn = ConexionBD();
+            cn.abrir_conexion();
+            if (!cn.getConector()) {
+                cout << "Error de conexion a la base de datos.\n";
+                pausar();
+                return;
+            }
+
+            string consulta = "SELECT idCliente, nombres, apellidos FROM Clientes WHERE NIT = '" + nitValidado + "';";
+            const char* sql = consulta.c_str();
+            int q_estado = mysql_query(cn.getConector(), sql);
+
+            if (q_estado) {
+                manejarErrorBD("Buscar cliente", consulta, cn.getConector());
                 cn.cerrar_conexion();
                 pausar();
                 return;
             }
-            mysql_free_result(resultado);
-        }
-    }
-    cn.cerrar_conexion();
 
-    // Mostrar empleados disponibles
-    cout << "\nEmpleados disponibles:\n";
-    Empleado e = Empleado();
-    e.leer();
+            MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+            if (resultado) {
+                MYSQL_ROW fila = mysql_fetch_row(resultado);
+                if (fila) {
+                    idcliente = atoi(fila[0]);
+                    cout << "Cliente encontrado: " << fila[1] << " " << fila[2] << endl;
+                    clienteEncontrado = true;
+                } else {
+                    cout << "Cliente no encontrado con NIT: " << nitValidado << endl;
+                    if (confirmarOperacion("¿Desea crear un nuevo cliente con este NIT?")) {
+                        mysql_free_result(resultado);
+                        cn.cerrar_conexion();
 
-    int idempleado = 0;
-    char serie = 'A'; // Serie por defecto
-    string fechafactura, fecha_ingreso;
+                        // Crear cliente con el NIT ya validado
+                        ingresarClienteConNIT(nitValidado);
 
-    // Generar número de factura automáticamente
-    string numeroFactura = generarCorrelativoFactura();
-    int nofactura = stoi(numeroFactura);
+                        // Buscar el cliente recién creado
+                        cn.abrir_conexion();
+                        if (cn.getConector()) {
+                            string consultaBuscar = "SELECT idCliente, nombres, apellidos FROM Clientes WHERE NIT = '" + nitValidado + "';";
+                            int q_estado_buscar = mysql_query(cn.getConector(), consultaBuscar.c_str());
+                            if (!q_estado_buscar) {
+                                MYSQL_RES* resultadoBuscar = mysql_store_result(cn.getConector());
+                                if (resultadoBuscar) {
+                                    MYSQL_ROW filaBuscar = mysql_fetch_row(resultadoBuscar);
+                                    if (filaBuscar) {
+                                        idcliente = atoi(filaBuscar[0]);
+                                        cout << "\nCliente creado y encontrado: " << filaBuscar[1] << " " << filaBuscar[2] << endl;
+                                        clienteEncontrado = true;
+                                    }
+                                    mysql_free_result(resultadoBuscar);
+                                }
+                            }
+                            cn.cerrar_conexion();
+                        }
 
-    cout << "\nNúmero de factura generado automáticamente: " << nofactura << endl;
-    cout << "Serie asignada automáticamente: " << serie << endl;
+                        if (!clienteEncontrado) {
+                            cout << "Error al crear o encontrar el cliente. Intente nuevamente.\n";
+                        }
+                    } else {
+                        cout << "Intente con otro NIT o cancele la operacion.\n";
+                    }
+                }
+                mysql_free_result(resultado);
+            }
+            cn.cerrar_conexion();
+        } while (!clienteEncontrado);
 
-    // Obtener fecha actual para fecha de factura y fecha_ingreso
-    fechafactura = obtenerFechaHoraActual().substr(0, 10); // Solo la fecha, sin la hora
-    fecha_ingreso = obtenerFechaHoraActual();
-    cout << "Fecha de factura: " << fechafactura << endl;
+        // Mostrar empleados disponibles
+        cout << "\nEmpleados disponibles:\n";
+        Empleado e = Empleado();
+        e.leer();
 
-    cout << "Ingrese ID de Empleado: ";
-    cin >> idempleado;
+        int idempleado = validarEnteroPositivo("\nIngrese ID de Empleado: ");
+        char serie = 'A'; // Serie por defecto
+        string fechafactura, fecha_ingreso;
 
-    // Usamos 0 como valor temporal para idVenta, ya que será generado por la base de datos
-    Venta v = Venta(0, nofactura, serie, fechafactura, idcliente, idempleado, fecha_ingreso);
+        // Generar número de factura automáticamente
+        string numeroFactura = generarCorrelativoFactura();
+        int nofactura = stoi(numeroFactura);
 
-    // Agregar detalles de venta
-    char agregarDetalle = 'S';
+        cout << "\nINFORMACION DE LA FACTURA:\n";
+        cout << "Numero de factura generado automaticamente: " << nofactura << endl;
+        cout << "Serie asignada automaticamente: " << serie << endl;
 
-    // Mostrar productos disponibles
-    cout << "\nProductos disponibles:\n";
-    Producto prod = Producto();
-    prod.leer();
+        // Obtener fecha actual para fecha de factura y fecha_ingreso
+        fechafactura = obtenerFechaHoraActual().substr(0, 10); // Solo la fecha, sin la hora
+        fecha_ingreso = obtenerFechaHoraActual();
+        cout << "Fecha de factura: " << fechafactura << endl;
 
-    while (agregarDetalle == 'S' || agregarDetalle == 's') {
-        DetalleVenta detalle;
+        // Usamos 0 como valor temporal para idVenta, ya que será generado por la base de datos
+        Venta v = Venta(0, nofactura, serie, fechafactura, idcliente, idempleado, fecha_ingreso);
 
-        // Usamos 0 como valor temporal para idventa_detalle, ya que será generado por la base de datos
-        detalle.idventa_detalle = 0;
-        cout << "Ingrese ID de Producto: ";
-        cin >> detalle.idProducto;
-        cin.ignore();
-        cout << "Ingrese Cantidad: ";
-        getline(cin, detalle.cantidad);
+        // Agregar detalles de venta con validaciones
+        char agregarDetalle = 'S';
+        bool primerDetalle = true;
 
-        // Obtener precio de venta automáticamente de la base de datos
-        ConexionBD cn = ConexionBD();
-        cn.abrir_conexion();
-        if (cn.getConector()) {
+        while (agregarDetalle == 'S' || agregarDetalle == 's') {
+            if (primerDetalle) {
+                cout << "\nPRODUCTOS DISPONIBLES:\n";
+                Producto prod = Producto();
+                prod.leer();
+                primerDetalle = false;
+            }
+
+            cout << "\n--- AGREGAR DETALLE DE VENTA ---\n";
+            DetalleVenta detalle;
+
+            // Usamos 0 como valor temporal para idventa_detalle, ya que será generado por la base de datos
+            detalle.idventa_detalle = 0;
+            detalle.idProducto = validarEnteroPositivo("Ingrese ID de Producto: ");
+
+            // Validar cantidad como string pero asegurar que sea numérica
+            bool cantidadValida = false;
+            do {
+                detalle.cantidad = validarTextoNoVacio("Ingrese Cantidad: ");
+
+                // Verificar que la cantidad sea un número válido
+                try {
+                    double cantidadNum = stod(detalle.cantidad);
+                    if (cantidadNum > 0) {
+                        cantidadValida = true;
+                    } else {
+                        cout << "Error: La cantidad debe ser mayor a 0. Intente nuevamente.\n";
+                    }
+                } catch (const exception& e) {
+                    cout << "Error: La cantidad debe ser un numero valido. Intente nuevamente.\n";
+                }
+            } while (!cantidadValida);
+
+            // Obtener precio de venta automáticamente de la base de datos
+            ConexionBD cn = ConexionBD();
+            cn.abrir_conexion();
+            if (!cn.getConector()) {
+                cout << "Error de conexion a la base de datos.\n";
+                pausar();
+                return;
+            }
+
             string consulta = "SELECT precio_venta, producto FROM Productos WHERE idProducto = " + to_string(detalle.idProducto) + ";";
             const char* sql = consulta.c_str();
-            mysql_query(cn.getConector(), sql);
-            MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+            int q_estado = mysql_query(cn.getConector(), sql);
 
+            if (q_estado) {
+                manejarErrorBD("Buscar producto", consulta, cn.getConector());
+                cn.cerrar_conexion();
+                cout << "\n¿Desea intentar con otro producto? (S/N): ";
+                cin >> agregarDetalle;
+                cin.ignore();
+                continue; // Continuar con el siguiente detalle
+            }
+
+            MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+            bool productoEncontrado = false;
             if (resultado) {
                 MYSQL_ROW fila = mysql_fetch_row(resultado);
                 if (fila) {
                     detalle.precio_unitario = atof(fila[0]);
-                    cout << "Producto: " << fila[1] << " - Precio: Q" << detalle.precio_unitario << endl;
+                    double subtotal = stod(detalle.cantidad) * detalle.precio_unitario;
+                    cout << "Producto: " << fila[1] << "\n";
+                    cout << "Precio unitario: " << formatearMoneda(detalle.precio_unitario) << "\n";
+                    cout << "Subtotal: " << formatearMoneda(subtotal) << "\n";
+                    productoEncontrado = true;
                 } else {
-                    cout << "Producto no encontrado. Usando precio 0.00" << endl;
-                    detalle.precio_unitario = 0.0;
+                    cout << "Producto no encontrado con ID: " << detalle.idProducto << "\n";
                 }
                 mysql_free_result(resultado);
             }
+            cn.cerrar_conexion();
+
+            if (!productoEncontrado) {
+                cout << "\n¿Desea intentar con otro producto? (S/N): ";
+                cin >> agregarDetalle;
+                cin.ignore();
+                continue; // Continuar con el siguiente detalle
+            }
+
+            // Solo agregar el detalle si el producto fue encontrado
+            v.agregarDetalle(detalle);
+
+            cout << "\n¿Desea agregar otro detalle? (S/N): ";
+            cin >> agregarDetalle;
+            cin.ignore();
         }
-        cn.cerrar_conexion();
 
-        v.agregarDetalle(detalle);
+        // Verificar que se hayan agregado detalles
+        if (v.getDetalles().empty()) {
+            cout << "\nError: No se puede crear una venta sin productos. Debe agregar al menos un detalle.\n";
+            pausar();
+            return;
+        }
 
-        cout << "\n¿Desea agregar otro detalle? (S/N): ";
-        cin >> agregarDetalle;
+        // Crear la venta
+        cout << "\nGuardando venta...\n";
+
+        // Llamar al método crear y obtener el ID
+        int idVentaCreada = v.crear();
+
+        // Generar PDF automáticamente si la venta fue exitosa
+        if (idVentaCreada > 0) {
+            cout << "\nVenta creada exitosamente!\n";
+            cout << "Generando factura PDF automaticamente...\n";
+            generarFacturaVentaPDF(idVentaCreada);
+        } else {
+            cout << "\nVenta creada exitosamente!\n";
+            cout << "Para generar PDF, use la opcion 9 del menu de ventas.\n";
+        }
+
+    } catch (const exception& e) {
+        cout << "Error inesperado: " << e.what() << "\n";
     }
-
-    v.crear();
 
     pausar();
 }
@@ -1220,9 +1432,7 @@ void mostrarDetallesVenta() {
     Venta v = Venta();
     v.leer();
 
-    int idVenta = 0;
-    cout << "\nIngrese el ID de la venta para ver detalles: ";
-    cin >> idVenta;
+    int idVenta = validarEnteroPositivo("\nIngrese el ID de la venta para ver detalles: ");
 
     v.leerDetalles(idVenta);
 
@@ -1283,21 +1493,15 @@ void eliminarVenta() {
     Venta v = Venta();
     v.leer();
 
-    int idVenta = 0;
-    cout << "\nIngrese el ID de la venta a eliminar: ";
-    cin >> idVenta;
+    int idVenta = validarEnteroPositivo("\nIngrese el ID de la venta a eliminar: ");
 
-    char confirmar;
-    cout << "¿Está seguro de eliminar este registro y todos sus detalles? (S/N): ";
-    cin >> confirmar;
-
-    if (confirmar == 'S' || confirmar == 's') {
+    if (confirmarOperacion("¿Está seguro de eliminar este registro y todos sus detalles?")) {
         v.setIdVenta(idVenta);
         v.eliminar();
         cout << "\nRegistro eliminado. Lista actualizada:\n";
         v.leer();
     } else {
-        cout << "\nOperación cancelada.\n";
+        cout << "\nOperacion cancelada.\n";
     }
 
     pausar();
@@ -1318,9 +1522,7 @@ void menuMarcas() {
         cout << "3. Actualizar marca\n";
         cout << "4. Eliminar marca\n";
         cout << "0. Volver al menú principal\n\n";
-        cout << "Ingrese una opción: ";
-        cin >> opcion;
-        cin.ignore();
+        opcion = validarOpcionMenu("Ingrese una opcion: ", 0, 4);
 
         switch (opcion) {
             case 1:
@@ -1349,10 +1551,7 @@ void ingresarMarca() {
     limpiarPantalla();
     cout << "===== INGRESAR NUEVA MARCA =====\n\n";
 
-    string marca;
-
-    cout << "Ingrese Nombre de Marca: ";
-    getline(cin, marca);
+    string marca = validarTextoNoVacio("Ingrese Nombre de Marca: ");
 
     // Usamos 0 como valor temporal para idmarca, ya que será generado por la base de datos
     Marca m = Marca(0, marca);
@@ -1378,14 +1577,8 @@ void actualizarMarca() {
     Marca m = Marca();
     m.leer();
 
-    short idmarca = 0;
-    string marca;
-
-    cout << "\nIngrese el ID de la marca a modificar: ";
-    cin >> idmarca;
-    cin.ignore();
-    cout << "Ingrese Nuevo Nombre de Marca: ";
-    getline(cin, marca);
+    short idmarca = validarEnteroPositivo("\nIngrese el ID de la marca a modificar: ");
+    string marca = validarTextoNoVacio("Ingrese Nuevo Nombre de Marca: ");
 
     m = Marca(idmarca, marca);
     m.actualizar();
@@ -1403,21 +1596,15 @@ void eliminarMarca() {
     Marca m = Marca();
     m.leer();
 
-    short idmarca = 0;
-    cout << "\nIngrese el ID de la marca a eliminar: ";
-    cin >> idmarca;
+    short idmarca = validarEnteroPositivo("\nIngrese el ID de la marca a eliminar: ");
 
-    char confirmar;
-    cout << "¿Está seguro de eliminar este registro? (S/N): ";
-    cin >> confirmar;
-
-    if (confirmar == 'S' || confirmar == 's') {
+    if (confirmarOperacion("¿Está seguro de eliminar este registro?")) {
         m.setIdMarca(idmarca);
         m.eliminar();
         cout << "\nRegistro eliminado. Lista actualizada:\n";
         m.leer();
     } else {
-        cout << "\nOperación cancelada.\n";
+        cout << "\nOperacion cancelada.\n";
     }
 
     pausar();
@@ -1436,9 +1623,7 @@ void menuPuestos() {
         cout << "3. Actualizar puesto\n";
         cout << "4. Eliminar puesto\n";
         cout << "0. Volver al menú principal\n\n";
-        cout << "Ingrese una opción: ";
-        cin >> opcion;
-        cin.ignore();
+        opcion = validarOpcionMenu("Ingrese una opcion: ", 0, 4);
 
         switch (opcion) {
             case 1:
@@ -1467,10 +1652,7 @@ void ingresarPuesto() {
     limpiarPantalla();
     cout << "===== INGRESAR NUEVO PUESTO =====\n\n";
 
-    string puesto;
-
-    cout << "Ingrese Nombre de Puesto: ";
-    getline(cin, puesto);
+    string puesto = validarTextoNoVacio("Ingrese Nombre de Puesto: ");
 
     // Usamos 0 como valor temporal para idPuesto, ya que será generado por la base de datos
     Puesto p = Puesto(0, puesto);
@@ -1496,14 +1678,8 @@ void actualizarPuesto() {
     Puesto p = Puesto();
     p.leer();
 
-    short idPuesto = 0;
-    string puesto;
-
-    cout << "\nIngrese el ID del puesto a modificar: ";
-    cin >> idPuesto;
-    cin.ignore();
-    cout << "Ingrese Nuevo Nombre de Puesto: ";
-    getline(cin, puesto);
+    short idPuesto = validarEnteroPositivo("\nIngrese el ID del puesto a modificar: ");
+    string puesto = validarTextoNoVacio("Ingrese Nuevo Nombre de Puesto: ");
 
     p = Puesto(idPuesto, puesto);
     p.actualizar();
@@ -1521,21 +1697,15 @@ void eliminarPuesto() {
     Puesto p = Puesto();
     p.leer();
 
-    short idPuesto = 0;
-    cout << "\nIngrese el ID del puesto a eliminar: ";
-    cin >> idPuesto;
+    short idPuesto = validarEnteroPositivo("\nIngrese el ID del puesto a eliminar: ");
 
-    char confirmar;
-    cout << "¿Está seguro de eliminar este registro? (S/N): ";
-    cin >> confirmar;
-
-    if (confirmar == 'S' || confirmar == 's') {
+    if (confirmarOperacion("¿Está seguro de eliminar este registro?")) {
         p.setIdPuesto(idPuesto);
         p.eliminar();
         cout << "\nRegistro eliminado. Lista actualizada:\n";
         p.leer();
     } else {
-        cout << "\nOperación cancelada.\n";
+        cout << "\nOperacion cancelada.\n";
     }
 
     pausar();
@@ -1610,6 +1780,36 @@ string validarFormatoNIT(string nit) {
     // Validación básica del NIT guatemalteco
     if (nit == "C/F" || nit == "c/f") {
         return "C/F"; // Consumidor final
+    }
+
+    // Eliminar espacios y guiones
+    string nitLimpio = "";
+    for (char c : nit) {
+        if (c != ' ' && c != '-') {
+            nitLimpio += c;
+        }
+    }
+
+    // Verificar que tenga entre 8 y 13 dígitos
+    if (nitLimpio.length() < 8 || nitLimpio.length() > 13) {
+        return ""; // NIT inválido
+    }
+
+    // Verificar que solo contenga dígitos
+    for (char c : nitLimpio) {
+        if (c < '0' || c > '9') {
+            return ""; // NIT inválido
+        }
+    }
+
+    return nitLimpio;
+}
+
+// Función para validar formato de NIT para búsqueda (excluye C/F)
+string validarFormatoNITParaBusqueda(string nit) {
+    // No permitir C/F en búsquedas
+    if (nit == "C/F" || nit == "c/f") {
+        return ""; // NIT inválido para búsqueda
     }
 
     // Eliminar espacios y guiones
@@ -2292,14 +2492,18 @@ void buscarClientePorNIT() {
     cout << "===== BUSCAR CLIENTE POR NIT =====\n\n";
 
     string nitBuscar;
-    cout << "Ingrese el NIT del cliente a buscar: ";
+    cout << "Ingrese el NIT del cliente a buscar\n";
+    cout << "(Solo NITs especificos, no se permite C/F en busquedas)\n";
+    cout << "NIT del cliente: ";
     getline(cin, nitBuscar);
 
-    // Validar formato del NIT
-    string nitValidado = validarFormatoNIT(nitBuscar);
+    // Validar formato del NIT para búsqueda (excluye C/F)
+    string nitValidado = validarFormatoNITParaBusqueda(nitBuscar);
     if (nitValidado.empty()) {
-        cout << "Formato de NIT inválido. Intente nuevamente.\n";
-        cout << "El NIT debe tener entre 8 y 13 dígitos o ser 'C/F' para consumidor final.\n";
+        cout << "\nFormato de NIT invalido para busqueda. Intente nuevamente.\n";
+        cout << "Formatos validos para busqueda:\n";
+        cout << "- NIT: 8 a 13 digitos (ej: 12345678, 1234567890123)\n";
+        cout << "- NO se permite C/F en busquedas (es para consumidor final sin NIT especifico)\n";
         pausar();
         return;
     }
@@ -2743,9 +2947,7 @@ int main() {
         cout << "7. Gestión de Compras\n";
         cout << "8. Gestión de Ventas\n";
         cout << "0. Salir\n\n";
-        cout << "Ingrese una opción: ";
-        cin >> opcion;
-        cin.ignore();
+        opcion = validarOpcionMenu("Ingrese una opcion: ", 0, 8);
 
         switch (opcion) {
             case 1:
@@ -2783,4 +2985,467 @@ int main() {
     } while (opcion != 0);
 
     return 0;
+}
+
+// ===== IMPLEMENTACIÓN DE FUNCIONES DE VALIDACIÓN =====
+
+// Función para validar entrada de números enteros positivos
+int validarEnteroPositivo(const string& mensaje, int minimo) {
+    int valor;
+    bool entradaValida = false;
+
+    do {
+        cout << mensaje;
+        if (cin >> valor) {
+            if (valor >= minimo) {
+                entradaValida = true;
+            } else {
+                cout << "Error: El valor debe ser mayor o igual a " << minimo << ". Intente nuevamente.\n";
+            }
+        } else {
+            cout << "Error: Debe ingresar un numero entero valido. Intente nuevamente.\n";
+            cin.clear(); // Limpiar el estado de error
+            cin.ignore(10000, '\n'); // Descartar entrada inválida
+        }
+    } while (!entradaValida);
+
+    cin.ignore(); // Limpiar buffer
+    return valor;
+}
+
+// Función para validar entrada de números decimales positivos
+double validarDecimalPositivo(const string& mensaje, double minimo) {
+    double valor;
+    bool entradaValida = false;
+
+    do {
+        cout << mensaje;
+        if (cin >> valor) {
+            if (valor >= minimo) {
+                entradaValida = true;
+            } else {
+                cout << "Error: El valor debe ser mayor o igual a " << minimo << ". Intente nuevamente.\n";
+            }
+        } else {
+            cout << "Error: Debe ingresar un numero decimal valido. Intente nuevamente.\n";
+            cin.clear();
+            cin.ignore(10000, '\n');
+        }
+    } while (!entradaValida);
+
+    cin.ignore();
+    return valor;
+}
+
+// Función para validar texto no vacío
+string validarTextoNoVacio(const string& mensaje) {
+    string texto;
+    bool entradaValida = false;
+
+    do {
+        cout << mensaje;
+        getline(cin, texto);
+
+        // Eliminar espacios al inicio y final
+        size_t inicio = texto.find_first_not_of(" \t");
+        if (inicio != string::npos) {
+            size_t fin = texto.find_last_not_of(" \t");
+            texto = texto.substr(inicio, fin - inicio + 1);
+        }
+
+        if (!texto.empty()) {
+            entradaValida = true;
+        } else {
+            cout << "Error: Este campo no puede estar vacio. Intente nuevamente.\n";
+        }
+    } while (!entradaValida);
+
+    return texto;
+}
+
+// Función para validar formato de fecha
+string validarFecha(const string& mensaje) {
+    string fecha;
+    bool entradaValida = false;
+
+    do {
+        cout << mensaje;
+        getline(cin, fecha);
+
+        // Validación básica del formato YYYY-MM-DD
+        if (fecha.length() == 10 && fecha[4] == '-' && fecha[7] == '-') {
+            bool formatoValido = true;
+
+            // Verificar que los caracteres sean dígitos en las posiciones correctas
+            for (int i = 0; i < 10; i++) {
+                if (i != 4 && i != 7) { // Saltar las posiciones de los guiones
+                    if (fecha[i] < '0' || fecha[i] > '9') {
+                        formatoValido = false;
+                        break;
+                    }
+                }
+            }
+
+            if (formatoValido) {
+                // Validaciones adicionales basicas
+                int anio = stoi(fecha.substr(0, 4));
+                int mes = stoi(fecha.substr(5, 2));
+                int dia = stoi(fecha.substr(8, 2));
+
+                if (anio >= 1900 && anio <= 2100 && mes >= 1 && mes <= 12 && dia >= 1 && dia <= 31) {
+                    entradaValida = true;
+                } else {
+                    cout << "Error: Fecha fuera de rango valido. Intente nuevamente.\n";
+                }
+            } else {
+                cout << "Error: Formato de fecha invalido. Use YYYY-MM-DD. Intente nuevamente.\n";
+            }
+        } else {
+            cout << "Error: Formato de fecha invalido. Use YYYY-MM-DD. Intente nuevamente.\n";
+        }
+    } while (!entradaValida);
+
+    return fecha;
+}
+
+// Función para manejo centralizado de errores de base de datos
+void manejarErrorBD(const string& operacion, const string& consulta, MYSQL* conector) {
+    cout << "\nERROR EN BASE DE DATOS\n";
+    cout << "Operacion: " << operacion << "\n";
+    cout << "Error MySQL: " << mysql_error(conector) << "\n";
+    cout << "Codigo de error: " << mysql_errno(conector) << "\n";
+
+    // Mostrar errores comunes de manera amigable
+    int codigoError = mysql_errno(conector);
+    switch (codigoError) {
+        case 1062:
+            cout << "Causa probable: Registro duplicado. Verifique que no este ingresando datos que ya existen.\n";
+            break;
+        case 1452:
+            cout << "Causa probable: Referencia invalida. Verifique que los IDs relacionados existan.\n";
+            break;
+        case 1451:
+            cout << "Causa probable: No se puede eliminar porque hay registros relacionados.\n";
+            break;
+        case 1054:
+            cout << "Causa probable: Campo inexistente en la tabla.\n";
+            break;
+        case 1146:
+            cout << "Causa probable: Tabla inexistente.\n";
+            break;
+        default:
+            cout << "Consulte con el administrador del sistema.\n";
+            break;
+    }
+
+    cout << "\nConsulta ejecutada: " << consulta << "\n";
+}
+
+// Función para confirmar operaciones críticas
+bool confirmarOperacion(const string& mensaje) {
+    char respuesta;
+    cout << mensaje << " (S/N): ";
+    cin >> respuesta;
+    cin.ignore();
+    return (respuesta == 'S' || respuesta == 's');
+}
+
+// Función para validar opciones de menú y evitar bucles infinitos
+int validarOpcionMenu(const string& mensaje, int minimo, int maximo) {
+    int opcion;
+    bool entradaValida = false;
+
+    do {
+        cout << mensaje;
+
+        // Verificar si la entrada es un número válido
+        if (cin >> opcion) {
+            // Verificar si está en el rango válido
+            if (opcion >= minimo && opcion <= maximo) {
+                entradaValida = true;
+            } else {
+                cout << "Error: Opcion invalida. Debe estar entre " << minimo << " y " << maximo << ". Intente nuevamente.\n\n";
+            }
+        } else {
+            // Si no es un número, limpiar el buffer y mostrar error
+            cout << "Error: Debe ingresar un numero valido. Intente nuevamente.\n\n";
+            cin.clear(); // Limpiar el estado de error
+            cin.ignore(10000, '\n'); // Descartar toda la línea inválida
+        }
+    } while (!entradaValida);
+
+    cin.ignore(); // Limpiar buffer para próximas entradas
+    return opcion;
+}
+
+// ===== FUNCIÓN PARA GENERAR PDF DE VENTAS =====
+
+// Función para generar PDF nativo de ventas usando solo C++
+void generarFacturaVentaPDF(int idVenta) {
+    ConexionBD cn = ConexionBD();
+    cn.abrir_conexion();
+
+    if (!cn.getConector()) {
+        cout << "Error en la conexion a la base de datos para generar factura.\n";
+        return;
+    }
+
+    try {
+        // Crear carpeta facturas si no existe
+        system("if not exist \"facturas\" mkdir facturas");
+
+        // Obtener información de la venta
+        string consulta = "SELECT v.idVenta, v.nofactura, v.serie, v.fechafactura, "
+                         "c.nombres, c.apellidos, c.NIT, c.telefono, c.correo_electronico, "
+                         "CONCAT(e.nombres, ' ', e.apellidos) as empleado "
+                         "FROM Ventas v "
+                         "INNER JOIN Clientes c ON v.idcliente = c.idCliente "
+                         "INNER JOIN Empleados e ON v.idempleado = e.idEmpleado "
+                         "WHERE v.idVenta = " + to_string(idVenta) + ";";
+
+        const char* sql = consulta.c_str();
+        int q_estado = mysql_query(cn.getConector(), sql);
+
+        if (q_estado) {
+            manejarErrorBD("Consultar informacion de venta", consulta, cn.getConector());
+            cn.cerrar_conexion();
+            return;
+        }
+
+        MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+        if (!resultado) {
+            cout << "Error al obtener resultados de la venta.\n";
+            cn.cerrar_conexion();
+            return;
+        }
+
+        MYSQL_ROW fila = mysql_fetch_row(resultado);
+        if (!fila) {
+            cout << "No se encontro la venta especificada (ID: " << idVenta << ").\n";
+            mysql_free_result(resultado);
+            cn.cerrar_conexion();
+            return;
+        }
+
+        // Extraer datos de la venta
+        string numeroFactura = fila[1];
+        string serie = fila[2];
+        string fechaFactura = fila[3];
+        string clienteNombre = string(fila[4]) + " " + string(fila[5]);
+        string clienteNIT = fila[6];
+        string clienteTelefono = fila[7] ? fila[7] : "No especificado";
+        string clienteCorreo = fila[8] ? fila[8] : "No especificado";
+        string empleado = fila[9];
+
+        mysql_free_result(resultado);
+
+        // Generar nombre del archivo PDF
+        string nombreArchivoPDF = "facturas/factura_venta_" + to_string(idVenta) + ".pdf";
+
+        // Crear archivo PDF
+        ofstream pdf(nombreArchivoPDF, ios::binary);
+        if (!pdf.is_open()) {
+            cout << "Error al crear el archivo PDF.\n";
+            cn.cerrar_conexion();
+            return;
+        }
+
+        // Obtener fecha y hora actual
+        time_t tiempoActual = time(0);
+        struct tm* tiempoLocal;
+        char buffer[80];
+
+        #ifdef _WIN32
+            struct tm tiempoLocalStruct;
+            localtime_s(&tiempoLocalStruct, &tiempoActual);
+            tiempoLocal = &tiempoLocalStruct;
+        #else
+            tiempoLocal = localtime(&tiempoActual);
+        #endif
+
+        strftime(buffer, sizeof(buffer), "%d/%m/%Y %H:%M:%S", tiempoLocal);
+        string fechaGeneracion = buffer;
+
+        // Escribir encabezado PDF
+        pdf << "%PDF-1.4\n";
+        pdf << "1 0 obj\n";
+        pdf << "<<\n";
+        pdf << "/Type /Catalog\n";
+        pdf << "/Pages 2 0 R\n";
+        pdf << ">>\n";
+        pdf << "endobj\n\n";
+
+        pdf << "2 0 obj\n";
+        pdf << "<<\n";
+        pdf << "/Type /Pages\n";
+        pdf << "/Kids [3 0 R]\n";
+        pdf << "/Count 1\n";
+        pdf << ">>\n";
+        pdf << "endobj\n\n";
+
+        pdf << "3 0 obj\n";
+        pdf << "<<\n";
+        pdf << "/Type /Page\n";
+        pdf << "/Parent 2 0 R\n";
+        pdf << "/MediaBox [0 0 612 792]\n";
+        pdf << "/Contents 4 0 R\n";
+        pdf << "/Resources << /Font << /F1 5 0 R /F2 6 0 R >> >>\n";
+        pdf << ">>\n";
+        pdf << "endobj\n\n";
+
+        // Contenido de la página
+        stringstream contenido;
+        contenido << "BT\n";
+        contenido << "/F2 16 Tf\n";
+        contenido << "50 750 Td\n";
+        contenido << "(FACTURA DE VENTA) Tj\n";
+        contenido << "0 -30 Td\n";
+        contenido << "/F1 12 Tf\n";
+        contenido << "(Factura No: " << serie << "-" << numeroFactura << ") Tj\n";
+        contenido << "0 -20 Td\n";
+        contenido << "(Fecha: " << fechaFactura << ") Tj\n";
+        contenido << "0 -20 Td\n";
+        contenido << "(Generado: " << fechaGeneracion << ") Tj\n";
+
+        contenido << "0 -40 Td\n";
+        contenido << "/F2 14 Tf\n";
+        contenido << "(DATOS DEL CLIENTE) Tj\n";
+        contenido << "0 -25 Td\n";
+        contenido << "/F1 11 Tf\n";
+        contenido << "(Cliente: " << clienteNombre << ") Tj\n";
+        contenido << "0 -18 Td\n";
+        contenido << "(NIT: " << clienteNIT << ") Tj\n";
+        contenido << "0 -18 Td\n";
+        contenido << "(Telefono: " << clienteTelefono << ") Tj\n";
+        contenido << "0 -18 Td\n";
+        contenido << "(Correo: " << clienteCorreo << ") Tj\n";
+        contenido << "0 -18 Td\n";
+        contenido << "(Atendido por: " << empleado << ") Tj\n";
+
+        // Obtener detalles de la venta
+        string consultaDetalles = "SELECT p.producto, vd.cantidad, vd.precio_unitario, "
+                                 "(vd.cantidad * vd.precio_unitario) as subtotal "
+                                 "FROM Ventas_detalle vd "
+                                 "INNER JOIN Productos p ON vd.idProducto = p.idProducto "
+                                 "WHERE vd.idventa = " + to_string(idVenta) + ";";
+
+        q_estado = mysql_query(cn.getConector(), consultaDetalles.c_str());
+        if (!q_estado) {
+            MYSQL_RES* resultadoDetalles = mysql_store_result(cn.getConector());
+            if (resultadoDetalles) {
+                contenido << "0 -40 Td\n";
+                contenido << "/F2 14 Tf\n";
+                contenido << "(DETALLE DE PRODUCTOS) Tj\n";
+                contenido << "0 -25 Td\n";
+                contenido << "/F1 10 Tf\n";
+                contenido << "(Producto                    Cant.    Precio Unit.    Subtotal) Tj\n";
+                contenido << "0 -15 Td\n";
+                contenido << "(================================================================) Tj\n";
+
+                double total = 0.0;
+                MYSQL_ROW filaDetalle;
+                while ((filaDetalle = mysql_fetch_row(resultadoDetalles))) {
+                    string producto = filaDetalle[0];
+                    string cantidad = filaDetalle[1];
+                    double precioUnitario = atof(filaDetalle[2]);
+                    double subtotal = atof(filaDetalle[3]);
+                    total += subtotal;
+
+                    // Truncar nombre del producto si es muy largo
+                    if (producto.length() > 25) {
+                        producto = producto.substr(0, 22) + "...";
+                    }
+
+                    contenido << "0 -15 Td\n";
+                    contenido << "(" << producto;
+                    // Agregar espacios para alineación
+                    for (int i = producto.length(); i < 25; i++) contenido << " ";
+                    contenido << cantidad;
+                    for (int i = cantidad.length(); i < 9; i++) contenido << " ";
+                    contenido << formatearMoneda(precioUnitario);
+                    contenido << formatearMoneda(subtotal) << ") Tj\n";
+                }
+
+                contenido << "0 -20 Td\n";
+                contenido << "(================================================================) Tj\n";
+                contenido << "0 -20 Td\n";
+                contenido << "/F2 12 Tf\n";
+                contenido << "(TOTAL:  " << formatearMoneda(total) << ") Tj\n";
+
+                mysql_free_result(resultadoDetalles);
+            }
+        }
+
+        contenido << "ET\n";
+
+        string contenidoStr = contenido.str();
+        pdf << "4 0 obj\n";
+        pdf << "<<\n";
+        pdf << "/Length " << contenidoStr.length() << "\n";
+        pdf << ">>\n";
+        pdf << "stream\n";
+        pdf << contenidoStr;
+        pdf << "endstream\n";
+        pdf << "endobj\n\n";
+
+        // Fuentes
+        pdf << "5 0 obj\n";
+        pdf << "<<\n";
+        pdf << "/Type /Font\n";
+        pdf << "/Subtype /Type1\n";
+        pdf << "/BaseFont /Helvetica\n";
+        pdf << ">>\n";
+        pdf << "endobj\n\n";
+
+        pdf << "6 0 obj\n";
+        pdf << "<<\n";
+        pdf << "/Type /Font\n";
+        pdf << "/Subtype /Type1\n";
+        pdf << "/BaseFont /Helvetica-Bold\n";
+        pdf << ">>\n";
+        pdf << "endobj\n\n";
+
+        // Tabla xref
+        long xrefPos = pdf.tellp();
+        pdf << "xref\n";
+        pdf << "0 7\n";
+        pdf << "0000000000 65535 f \n";
+        pdf << "0000000009 65535 n \n";
+        pdf << "0000000074 65535 n \n";
+        pdf << "0000000120 65535 n \n";
+        pdf << "0000000274 65535 n \n";
+        pdf << "0000000000 65535 n \n";
+        pdf << "0000000000 65535 n \n";
+
+        // Trailer
+        pdf << "trailer\n";
+        pdf << "<<\n";
+        pdf << "/Size 7\n";
+        pdf << "/Root 1 0 R\n";
+        pdf << ">>\n";
+        pdf << "startxref\n";
+        pdf << xrefPos << "\n";
+        pdf << "%%EOF\n";
+
+        pdf.close();
+        cn.cerrar_conexion();
+
+        cout << "\nFACTURA PDF GENERADA\n";
+        cout << "PDF generado exitosamente: " << nombreArchivoPDF << endl;
+
+        // Intentar abrir el PDF automaticamente
+        string comando = "start \"\" \"" + nombreArchivoPDF + "\"";
+        int resultado_comando = system(comando.c_str());
+
+        if (resultado_comando == 0) {
+            cout << "PDF abierto automaticamente.\n";
+        } else {
+            cout << "PDF guardado en la carpeta 'facturas'.\n";
+            cout << "Puede abrir manualmente el archivo: " << nombreArchivoPDF << "\n";
+        }
+
+    } catch (const exception& e) {
+        cout << "Error inesperado al generar PDF: " << e.what() << "\n";
+        cn.cerrar_conexion();
+    }
 }
