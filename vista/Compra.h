@@ -53,8 +53,9 @@ public:
     vector<DetalleCompra> getDetalles() { return detalles; }
 
     // Métodos CRUD
-    void crear() {
+    int crear() {
         int q_estado = 0;
+        int idCompraCreada = 0;
         ConexionBD cn = ConexionBD();
         cn.abrir_conexion();
         if (cn.getConector()) {
@@ -74,6 +75,7 @@ public:
                     MYSQL_RES* resultado = mysql_store_result(cn.getConector());
                     MYSQL_ROW fila = mysql_fetch_row(resultado);
                     string id = fila[0];
+                    idCompraCreada = atoi(id.c_str());
 
                     // Insertar detalles de compra
                     for (DetalleCompra detalle : detalles) {
@@ -106,6 +108,7 @@ public:
             cout << "xxx Error en la conexión xxx" << endl;
         }
         cn.cerrar_conexion();
+        return idCompraCreada;
     }
 
     void leer() {

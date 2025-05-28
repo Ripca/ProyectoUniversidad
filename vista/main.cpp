@@ -4,6 +4,8 @@
 #include <string>
 #include <ctime>
 #include <iomanip>
+#include <fstream>
+#include <sstream>
 #include "ConexionBD.h"
 #include "Puesto.h"
 #include "Marca.h"
@@ -46,8 +48,6 @@ string obtenerFechaHoraActual() {
     return fecha;
 }
 
-
-
 // Funciones para Marca
 void menuMarcas();
 void ingresarMarca();
@@ -68,6 +68,65 @@ void ingresarProveedor();
 void mostrarProveedores();
 void actualizarProveedor();
 void eliminarProveedor();
+
+// Funciones para Producto
+void menuProductos();
+void ingresarProducto();
+void mostrarProductos();
+void actualizarProducto();
+void eliminarProducto();
+
+// Funciones para Empleado
+void menuEmpleados();
+void ingresarEmpleado();
+void mostrarEmpleados();
+void actualizarEmpleado();
+void eliminarEmpleado();
+
+// Funciones para Cliente
+void menuClientes();
+void ingresarCliente();
+void mostrarClientes();
+void actualizarCliente();
+void eliminarCliente();
+
+// Funciones para Compra
+void menuCompras();
+void ingresarCompra();
+void mostrarCompras();
+void mostrarDetallesCompra();
+void actualizarCompra();
+void eliminarCompra();
+
+// Funciones para detalles de compra
+void menuDetallesCompra();
+void actualizarDetalleCompra();
+void eliminarDetalleCompra();
+
+// Funciones para Venta
+void menuVentas();
+void ingresarVenta();
+void mostrarVentas();
+void mostrarDetallesVenta();
+void actualizarVenta();
+void eliminarVenta();
+
+// Funciones para detalles de venta
+void menuDetallesVenta();
+void actualizarDetalleVenta();
+void eliminarDetalleVenta();
+
+// Funciones adicionales para Ventas
+void buscarClientePorNIT();
+void imprimirFactura();
+string generarCorrelativoFactura();
+string validarFormatoNIT(string nit);
+
+// Funciones adicionales para Compras
+string generarNumeroOrdenCompra();
+void generarFacturaCompra(int idcompra);
+string formatearMoneda(double cantidad);
+void generarFacturaPDF(int idcompra);
 
 // Implementación de funciones para Proveedor
 void menuProveedores() {
@@ -199,12 +258,7 @@ void eliminarProveedor() {
     pausar();
 }
 
-// Funciones para Producto
-void menuProductos();
-void ingresarProducto();
-void mostrarProductos();
-void actualizarProducto();
-void eliminarProducto();
+
 
 // Implementación de funciones para Producto
 void menuProductos() {
@@ -374,12 +428,7 @@ void eliminarProducto() {
     pausar();
 }
 
-// Funciones para Empleado
-void menuEmpleados();
-void ingresarEmpleado();
-void mostrarEmpleados();
-void actualizarEmpleado();
-void eliminarEmpleado();
+
 
 // Implementación de funciones para Empleado
 void menuEmpleados() {
@@ -559,12 +608,7 @@ void eliminarEmpleado() {
     pausar();
 }
 
-// Funciones para Cliente
-void menuClientes();
-void ingresarCliente();
-void mostrarClientes();
-void actualizarCliente();
-void eliminarCliente();
+
 
 // Implementación de funciones para Cliente
 void menuClientes() {
@@ -576,8 +620,9 @@ void menuClientes() {
         cout << "======================================\n\n";
         cout << "1. Ingresar nuevo cliente\n";
         cout << "2. Mostrar todos los clientes\n";
-        cout << "3. Actualizar cliente\n";
-        cout << "4. Eliminar cliente\n";
+        cout << "3. Buscar cliente por NIT\n";
+        cout << "4. Actualizar cliente\n";
+        cout << "5. Eliminar cliente\n";
         cout << "0. Volver al menú principal\n\n";
         cout << "Ingrese una opción: ";
         cin >> opcion;
@@ -591,9 +636,12 @@ void menuClientes() {
                 mostrarClientes();
                 break;
             case 3:
-                actualizarCliente();
+                buscarClientePorNIT();
                 break;
             case 4:
+                actualizarCliente();
+                break;
+            case 5:
                 eliminarCliente();
                 break;
             case 0:
@@ -733,246 +781,6 @@ void mostrarDetallesCompraIndividual();
 void actualizarDetalleCompra();
 void eliminarDetalleCompra();
 
-// Implementación de funciones para Compra_detalle
-void menuDetallesCompra() {
-    int opcion = 0;
-    do {
-        limpiarPantalla();
-        cout << "======================================\n";
-        cout << "    GESTIÓN DE DETALLES DE COMPRA    \n";
-        cout << "======================================\n\n";
-        cout << "1. Ingresar nuevo detalle de compra\n";
-        cout << "2. Mostrar detalles de compra\n";
-        cout << "3. Actualizar detalle de compra\n";
-        cout << "4. Eliminar detalle de compra\n";
-        cout << "0. Volver al menú principal\n\n";
-        cout << "Ingrese una opción: ";
-        cin >> opcion;
-        cin.ignore();
-
-        switch (opcion) {
-            case 1:
-                ingresarDetalleCompra();
-                break;
-            case 2:
-                mostrarDetallesCompraIndividual();
-                break;
-            case 3:
-                actualizarDetalleCompra();
-                break;
-            case 4:
-                eliminarDetalleCompra();
-                break;
-            case 0:
-                // Volver al menú principal
-                break;
-            default:
-                cout << "\nOpción no válida. Intente de nuevo.\n";
-                pausar();
-        }
-    } while (opcion != 0);
-}
-
-void ingresarDetalleCompra() {
-    limpiarPantalla();
-    cout << "===== INGRESAR NUEVO DETALLE DE COMPRA =====\n\n";
-
-    // Mostrar compras disponibles
-    cout << "Compras disponibles:\n";
-    Compra c = Compra();
-    c.leer();
-
-    // Mostrar productos disponibles
-    cout << "\nProductos disponibles:\n";
-    Producto p = Producto();
-    p.leer();
-
-    int idcompra = 0, idproducto = 0, cantidad = 0;
-    double precio_unitario = 0.0;
-
-    cout << "Ingrese ID de Compra: ";
-    cin >> idcompra;
-    cout << "Ingrese ID de Producto: ";
-    cin >> idproducto;
-    cout << "Ingrese Cantidad: ";
-    cin >> cantidad;
-    cout << "Ingrese Precio Unitario: ";
-    cin >> precio_unitario;
-
-    // Crear el detalle de compra directamente en la base de datos
-    int q_estado = 0;
-    ConexionBD cn = ConexionBD();
-    cn.abrir_conexion();
-    if (cn.getConector()) {
-        string idc = to_string(idcompra);
-        string idp = to_string(idproducto);
-        string cant = to_string(cantidad);
-        string pu = to_string(precio_unitario);
-
-        // Modificamos la consulta para usar AUTO_INCREMENT
-        string consulta = "INSERT INTO Compras_detalle(idcompra, idproducto, cantidad, precio_unitario) VALUES (" + idc + ", " + idp + ", " + cant + ", " + pu + ");";
-        const char* c = consulta.c_str();
-        q_estado = mysql_query(cn.getConector(), c);
-        if (!q_estado) {
-            cout << "Ingreso de Detalle de Compra Exitoso..." << endl;
-        }
-        else {
-            cout << "xxx Error al ingresar información xxx" << endl;
-            cout << consulta << endl;
-        }
-    }
-    else {
-        cout << "xxx Error en la conexión xxx" << endl;
-    }
-    cn.cerrar_conexion();
-
-    pausar();
-}
-
-void mostrarDetallesCompraIndividual() {
-    limpiarPantalla();
-    cout << "===== LISTADO DE DETALLES DE COMPRA =====\n\n";
-
-    // Mostrar todas las compras
-    cout << "Compras disponibles:\n";
-    Compra c = Compra();
-    c.leer();
-
-    int idcompra = 0;
-    cout << "\nIngrese el ID de la compra para ver sus detalles: ";
-    cin >> idcompra;
-
-    // Mostrar los detalles de la compra seleccionada
-    c.leerDetalles(idcompra);
-
-    pausar();
-}
-
-void actualizarDetalleCompra() {
-    limpiarPantalla();
-    cout << "===== ACTUALIZAR DETALLE DE COMPRA =====\n\n";
-
-    // Mostrar compras disponibles
-    cout << "Compras disponibles:\n";
-    Compra c = Compra();
-    c.leer();
-
-    int idcompra = 0;
-    cout << "\nIngrese el ID de la compra para ver sus detalles: ";
-    cin >> idcompra;
-
-    // Mostrar los detalles de la compra seleccionada
-    c.leerDetalles(idcompra);
-
-    // Mostrar productos disponibles
-    cout << "\nProductos disponibles:\n";
-    Producto p = Producto();
-    p.leer();
-
-    int idcompra_detalle = 0, idproducto = 0, cantidad = 0;
-    double precio_unitario = 0.0;
-
-    cout << "\nIngrese el ID del detalle de compra a modificar: ";
-    cin >> idcompra_detalle;
-    cout << "Ingrese Nuevo ID de Producto: ";
-    cin >> idproducto;
-    cout << "Ingrese Nueva Cantidad: ";
-    cin >> cantidad;
-    cout << "Ingrese Nuevo Precio Unitario: ";
-    cin >> precio_unitario;
-
-    // Actualizar el detalle de compra directamente en la base de datos
-    int q_estado = 0;
-    ConexionBD cn = ConexionBD();
-    cn.abrir_conexion();
-    if (cn.getConector()) {
-        string idcd = to_string(idcompra_detalle);
-        string idp = to_string(idproducto);
-        string cant = to_string(cantidad);
-        string pu = to_string(precio_unitario);
-
-        string consulta = "UPDATE Compras_detalle SET idproducto = " + idp + ", cantidad = " + cant + ", precio_unitario = " + pu + " WHERE idcompra_detalle = " + idcd + ";";
-        const char* sql = consulta.c_str();
-        q_estado = mysql_query(cn.getConector(), sql);
-        if (!q_estado) {
-            cout << "Actualización de Detalle de Compra Exitosa..." << endl;
-
-            // Mostrar los detalles actualizados
-            cout << "\nDetalles actualizados:\n";
-            Compra compra = Compra();
-            compra.leerDetalles(idcompra);
-        }
-        else {
-            cout << "xxx Error al actualizar información xxx" << endl;
-            cout << consulta << endl;
-        }
-    }
-    else {
-        cout << "xxx Error en la conexión xxx" << endl;
-    }
-    cn.cerrar_conexion();
-
-    pausar();
-}
-
-void eliminarDetalleCompra() {
-    limpiarPantalla();
-    cout << "===== ELIMINAR DETALLE DE COMPRA =====\n\n";
-
-    // Mostrar compras disponibles
-    cout << "Compras disponibles:\n";
-    Compra c = Compra();
-    c.leer();
-
-    int idcompra = 0;
-    cout << "\nIngrese el ID de la compra para ver sus detalles: ";
-    cin >> idcompra;
-
-    // Mostrar los detalles de la compra seleccionada
-    c.leerDetalles(idcompra);
-
-    int idcompra_detalle = 0;
-    cout << "\nIngrese el ID del detalle de compra a eliminar: ";
-    cin >> idcompra_detalle;
-
-    char confirmar;
-    cout << "¿Está seguro de eliminar este detalle? (S/N): ";
-    cin >> confirmar;
-
-    if (confirmar == 'S' || confirmar == 's') {
-        // Eliminar el detalle de compra directamente en la base de datos
-        int q_estado = 0;
-        ConexionBD cn = ConexionBD();
-        cn.abrir_conexion();
-        if (cn.getConector()) {
-            string idcd = to_string(idcompra_detalle);
-
-            string consulta = "DELETE FROM Compras_detalle WHERE idcompra_detalle = " + idcd + ";";
-            const char* sql = consulta.c_str();
-            q_estado = mysql_query(cn.getConector(), sql);
-            if (!q_estado) {
-                cout << "Eliminación de Detalle de Compra Exitosa..." << endl;
-
-                // Mostrar los detalles actualizados
-                cout << "\nDetalles actualizados:\n";
-                Compra compra = Compra();
-                compra.leerDetalles(idcompra);
-            }
-            else {
-                cout << "xxx Error al eliminar información xxx" << endl;
-                cout << consulta << endl;
-            }
-        }
-        else {
-            cout << "xxx Error en la conexión xxx" << endl;
-        }
-        cn.cerrar_conexion();
-    } else {
-        cout << "\nOperación cancelada.\n";
-    }
-
-    pausar();
-}
 
 // Implementación de funciones para Compra
 void menuCompras() {
@@ -987,6 +795,8 @@ void menuCompras() {
         cout << "3. Ver detalles de una compra\n";
         cout << "4. Actualizar compra\n";
         cout << "5. Eliminar compra\n";
+        cout << "6. Gestionar detalles de compra\n";
+        cout << "7. Generar factura de compra\n";
         cout << "0. Volver al menú principal\n\n";
         cout << "Ingrese una opción: ";
         cin >> opcion;
@@ -1008,6 +818,22 @@ void menuCompras() {
             case 5:
                 eliminarCompra();
                 break;
+            case 6:
+                menuDetallesCompra();
+                break;
+            case 7:
+                {
+                    limpiarPantalla();
+                    cout << "===== GENERAR FACTURA PDF DE COMPRA =====\n\n";
+                    Compra c = Compra();
+                    c.leer();
+                    int idcompra = 0;
+                    cout << "\nIngrese el ID de la compra para generar factura PDF: ";
+                    cin >> idcompra;
+                    generarFacturaPDF(idcompra);
+                    pausar();
+                }
+                break;
             case 0:
                 // Volver al menú principal
                 break;
@@ -1027,11 +853,15 @@ void ingresarCompra() {
     Proveedor prov = Proveedor();
     prov.leer();
 
-    int no_order_compra = 0, idproveedor = 0;
+    int idproveedor = 0;
     string fecha_order, fecha_ingreso;
 
-    cout << "Ingrese No. de Orden de Compra: ";
-    cin >> no_order_compra;
+    // Generar número de orden de compra automáticamente
+    string numeroOrden = generarNumeroOrdenCompra();
+    int no_order_compra = stoi(numeroOrden);
+
+    cout << "\nNúmero de orden de compra generado automáticamente: " << no_order_compra << endl;
+
     cout << "Ingrese ID de Proveedor: ";
     cin >> idproveedor;
     cin.ignore();
@@ -1061,8 +891,29 @@ void ingresarCompra() {
         cin >> detalle.idproducto;
         cout << "Ingrese Cantidad: ";
         cin >> detalle.cantidad;
-        cout << "Ingrese Precio Unitario: ";
-        cin >> detalle.precio_unitario;
+
+        // Obtener precio de costo automáticamente de la base de datos
+        ConexionBD cn = ConexionBD();
+        cn.abrir_conexion();
+        if (cn.getConector()) {
+            string consulta = "SELECT precio_costo, producto FROM Productos WHERE idProducto = " + to_string(detalle.idproducto) + ";";
+            const char* sql = consulta.c_str();
+            mysql_query(cn.getConector(), sql);
+            MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+
+            if (resultado) {
+                MYSQL_ROW fila = mysql_fetch_row(resultado);
+                if (fila) {
+                    detalle.precio_unitario = atof(fila[0]);
+                    cout << "Producto: " << fila[1] << " - Precio de costo: Q" << detalle.precio_unitario << endl;
+                } else {
+                    cout << "Producto no encontrado. Usando precio 0.00" << endl;
+                    detalle.precio_unitario = 0.0;
+                }
+                mysql_free_result(resultado);
+            }
+        }
+        cn.cerrar_conexion();
 
         c.agregarDetalle(detalle);
 
@@ -1070,7 +921,13 @@ void ingresarCompra() {
         cin >> agregarDetalle;
     }
 
-    c.crear();
+    int idCompraCreada = c.crear();
+
+    // Generar factura automáticamente si la compra fue exitosa
+    if (idCompraCreada > 0) {
+        cout << "\nGenerando factura de compra en PDF...\n";
+        generarFacturaPDF(idCompraCreada);
+    }
 
     pausar();
 }
@@ -1165,263 +1022,7 @@ void eliminarCompra() {
     pausar();
 }
 
-// Funciones para Venta
-void menuVentas();
-void ingresarVenta();
-void mostrarVentas();
-void mostrarDetallesVenta();
-void actualizarVenta();
-void eliminarVenta();
 
-// Funciones para Venta_detalle
-void menuDetallesVenta();
-void ingresarDetalleVenta();
-void mostrarDetallesVentaIndividual();
-void actualizarDetalleVenta();
-void eliminarDetalleVenta();
-
-// Implementación de funciones para Venta_detalle
-void menuDetallesVenta() {
-    int opcion = 0;
-    do {
-        limpiarPantalla();
-        cout << "======================================\n";
-        cout << "     GESTIÓN DE DETALLES DE VENTA    \n";
-        cout << "======================================\n\n";
-        cout << "1. Ingresar nuevo detalle de venta\n";
-        cout << "2. Mostrar detalles de venta\n";
-        cout << "3. Actualizar detalle de venta\n";
-        cout << "4. Eliminar detalle de venta\n";
-        cout << "0. Volver al menú principal\n\n";
-        cout << "Ingrese una opción: ";
-        cin >> opcion;
-        cin.ignore();
-
-        switch (opcion) {
-            case 1:
-                ingresarDetalleVenta();
-                break;
-            case 2:
-                mostrarDetallesVentaIndividual();
-                break;
-            case 3:
-                actualizarDetalleVenta();
-                break;
-            case 4:
-                eliminarDetalleVenta();
-                break;
-            case 0:
-                // Volver al menú principal
-                break;
-            default:
-                cout << "\nOpción no válida. Intente de nuevo.\n";
-                pausar();
-        }
-    } while (opcion != 0);
-}
-
-void ingresarDetalleVenta() {
-    limpiarPantalla();
-    cout << "===== INGRESAR NUEVO DETALLE DE VENTA =====\n\n";
-
-    // Mostrar ventas disponibles
-    cout << "Ventas disponibles:\n";
-    Venta v = Venta();
-    v.leer();
-
-    // Mostrar productos disponibles
-    cout << "\nProductos disponibles:\n";
-    Producto p = Producto();
-    p.leer();
-
-    int idventa = 0, idProducto = 0;
-    string cantidad;
-    double precio_unitario = 0.0;
-
-    cout << "Ingrese ID de Venta: ";
-    cin >> idventa;
-    cout << "Ingrese ID de Producto: ";
-    cin >> idProducto;
-    cin.ignore();
-    cout << "Ingrese Cantidad: ";
-    getline(cin, cantidad);
-    cout << "Ingrese Precio Unitario: ";
-    cin >> precio_unitario;
-
-    // Crear el detalle de venta directamente en la base de datos
-    int q_estado = 0;
-    ConexionBD cn = ConexionBD();
-    cn.abrir_conexion();
-    if (cn.getConector()) {
-        string idv = to_string(idventa);
-        string idp = to_string(idProducto);
-        string pu = to_string(precio_unitario);
-
-        // Modificamos la consulta para usar AUTO_INCREMENT
-        string consulta = "INSERT INTO Ventas_detalle(idventa, idProducto, cantidad, precio_unitario) VALUES (" + idv + ", " + idp + ", '" + cantidad + "', " + pu + ");";
-        const char* c = consulta.c_str();
-        q_estado = mysql_query(cn.getConector(), c);
-        if (!q_estado) {
-            cout << "Ingreso de Detalle de Venta Exitoso..." << endl;
-        }
-        else {
-            cout << "xxx Error al ingresar información xxx" << endl;
-            cout << consulta << endl;
-        }
-    }
-    else {
-        cout << "xxx Error en la conexión xxx" << endl;
-    }
-    cn.cerrar_conexion();
-
-    pausar();
-}
-
-void mostrarDetallesVentaIndividual() {
-    limpiarPantalla();
-    cout << "===== LISTADO DE DETALLES DE VENTA =====\n\n";
-
-    // Mostrar todas las ventas
-    cout << "Ventas disponibles:\n";
-    Venta v = Venta();
-    v.leer();
-
-    int idventa = 0;
-    cout << "\nIngrese el ID de la venta para ver sus detalles: ";
-    cin >> idventa;
-
-    // Mostrar los detalles de la venta seleccionada
-    v.leerDetalles(idventa);
-
-    pausar();
-}
-
-void actualizarDetalleVenta() {
-    limpiarPantalla();
-    cout << "===== ACTUALIZAR DETALLE DE VENTA =====\n\n";
-
-    // Mostrar ventas disponibles
-    cout << "Ventas disponibles:\n";
-    Venta v = Venta();
-    v.leer();
-
-    int idventa = 0;
-    cout << "\nIngrese el ID de la venta para ver sus detalles: ";
-    cin >> idventa;
-
-    // Mostrar los detalles de la venta seleccionada
-    v.leerDetalles(idventa);
-
-    // Mostrar productos disponibles
-    cout << "\nProductos disponibles:\n";
-    Producto p = Producto();
-    p.leer();
-
-    int idventa_detalle = 0, idProducto = 0;
-    string cantidad;
-    double precio_unitario = 0.0;
-
-    cout << "\nIngrese el ID del detalle de venta a modificar: ";
-    cin >> idventa_detalle;
-    cout << "Ingrese Nuevo ID de Producto: ";
-    cin >> idProducto;
-    cin.ignore();
-    cout << "Ingrese Nueva Cantidad: ";
-    getline(cin, cantidad);
-    cout << "Ingrese Nuevo Precio Unitario: ";
-    cin >> precio_unitario;
-
-    // Actualizar el detalle de venta directamente en la base de datos
-    int q_estado = 0;
-    ConexionBD cn = ConexionBD();
-    cn.abrir_conexion();
-    if (cn.getConector()) {
-        string idvd = to_string(idventa_detalle);
-        string idp = to_string(idProducto);
-        string pu = to_string(precio_unitario);
-
-        string consulta = "UPDATE Ventas_detalle SET idProducto = " + idp + ", cantidad = '" + cantidad + "', precio_unitario = " + pu + " WHERE idventa_detalle = " + idvd + ";";
-        const char* sql = consulta.c_str();
-        q_estado = mysql_query(cn.getConector(), sql);
-        if (!q_estado) {
-            cout << "Actualización de Detalle de Venta Exitosa..." << endl;
-
-            // Mostrar los detalles actualizados
-            cout << "\nDetalles actualizados:\n";
-            Venta venta = Venta();
-            venta.leerDetalles(idventa);
-        }
-        else {
-            cout << "xxx Error al actualizar información xxx" << endl;
-            cout << consulta << endl;
-        }
-    }
-    else {
-        cout << "xxx Error en la conexión xxx" << endl;
-    }
-    cn.cerrar_conexion();
-
-    pausar();
-}
-
-void eliminarDetalleVenta() {
-    limpiarPantalla();
-    cout << "===== ELIMINAR DETALLE DE VENTA =====\n\n";
-
-    // Mostrar ventas disponibles
-    cout << "Ventas disponibles:\n";
-    Venta v = Venta();
-    v.leer();
-
-    int idventa = 0;
-    cout << "\nIngrese el ID de la venta para ver sus detalles: ";
-    cin >> idventa;
-
-    // Mostrar los detalles de la venta seleccionada
-    v.leerDetalles(idventa);
-
-    int idventa_detalle = 0;
-    cout << "\nIngrese el ID del detalle de venta a eliminar: ";
-    cin >> idventa_detalle;
-
-    char confirmar;
-    cout << "¿Está seguro de eliminar este detalle? (S/N): ";
-    cin >> confirmar;
-
-    if (confirmar == 'S' || confirmar == 's') {
-        // Eliminar el detalle de venta directamente en la base de datos
-        int q_estado = 0;
-        ConexionBD cn = ConexionBD();
-        cn.abrir_conexion();
-        if (cn.getConector()) {
-            string idvd = to_string(idventa_detalle);
-
-            string consulta = "DELETE FROM Ventas_detalle WHERE idventa_detalle = " + idvd + ";";
-            const char* sql = consulta.c_str();
-            q_estado = mysql_query(cn.getConector(), sql);
-            if (!q_estado) {
-                cout << "Eliminación de Detalle de Venta Exitosa..." << endl;
-
-                // Mostrar los detalles actualizados
-                cout << "\nDetalles actualizados:\n";
-                Venta venta = Venta();
-                venta.leerDetalles(idventa);
-            }
-            else {
-                cout << "xxx Error al eliminar información xxx" << endl;
-                cout << consulta << endl;
-            }
-        }
-        else {
-            cout << "xxx Error en la conexión xxx" << endl;
-        }
-        cn.cerrar_conexion();
-    } else {
-        cout << "\nOperación cancelada.\n";
-    }
-
-    pausar();
-}
 
 // Implementación de funciones para Venta
 void menuVentas() {
@@ -1436,6 +1037,9 @@ void menuVentas() {
         cout << "3. Ver detalles de una venta\n";
         cout << "4. Actualizar venta\n";
         cout << "5. Eliminar venta\n";
+        cout << "6. Gestionar detalles de venta\n";
+        cout << "7. Buscar cliente por NIT\n";
+        cout << "8. Imprimir factura\n";
         cout << "0. Volver al menú principal\n\n";
         cout << "Ingrese una opción: ";
         cin >> opcion;
@@ -1457,6 +1061,15 @@ void menuVentas() {
             case 5:
                 eliminarVenta();
                 break;
+            case 6:
+                menuDetallesVenta();
+                break;
+            case 7:
+                buscarClientePorNIT();
+                break;
+            case 8:
+                imprimirFactura();
+                break;
             case 0:
                 // Volver al menú principal
                 break;
@@ -1471,34 +1084,68 @@ void ingresarVenta() {
     limpiarPantalla();
     cout << "===== INGRESAR NUEVA VENTA =====\n\n";
 
-    // Mostrar clientes disponibles
-    cout << "Clientes disponibles:\n";
-    Cliente c = Cliente();
-    c.leer();
+    // Buscar cliente por NIT
+    string nitCliente;
+    int idcliente = 0;
+    cout << "Ingrese el NIT del cliente: ";
+    getline(cin, nitCliente);
+
+    // Validar y buscar cliente
+    string nitValidado = validarFormatoNIT(nitCliente);
+    if (nitValidado.empty()) {
+        cout << "Formato de NIT inválido.\n";
+        pausar();
+        return;
+    }
+
+    ConexionBD cn = ConexionBD();
+    cn.abrir_conexion();
+    if (cn.getConector()) {
+        string consulta = "SELECT idCliente, nombres, apellidos FROM Clientes WHERE NIT = '" + nitValidado + "';";
+        const char* sql = consulta.c_str();
+        mysql_query(cn.getConector(), sql);
+        MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+
+        if (resultado) {
+            MYSQL_ROW fila = mysql_fetch_row(resultado);
+            if (fila) {
+                idcliente = atoi(fila[0]);
+                cout << "Cliente encontrado: " << fila[1] << " " << fila[2] << endl;
+            } else {
+                cout << "Cliente no encontrado. Debe crear el cliente primero.\n";
+                mysql_free_result(resultado);
+                cn.cerrar_conexion();
+                pausar();
+                return;
+            }
+            mysql_free_result(resultado);
+        }
+    }
+    cn.cerrar_conexion();
 
     // Mostrar empleados disponibles
     cout << "\nEmpleados disponibles:\n";
     Empleado e = Empleado();
     e.leer();
 
-    int nofactura = 0, idcliente = 0, idempleado = 0;
-    char serie;
+    int idempleado = 0;
+    char serie = 'A'; // Serie por defecto
     string fechafactura, fecha_ingreso;
 
-    cout << "Ingrese No. de Factura: ";
-    cin >> nofactura;
-    cout << "Ingrese Serie (A-Z): ";
-    cin >> serie;
-    cin.ignore();
-    cout << "Ingrese Fecha de Factura (YYYY-MM-DD): ";
-    getline(cin, fechafactura);
-    cout << "Ingrese ID de Cliente: ";
-    cin >> idcliente;
+    // Generar número de factura automáticamente
+    string numeroFactura = generarCorrelativoFactura();
+    int nofactura = stoi(numeroFactura);
+
+    cout << "\nNúmero de factura generado automáticamente: " << nofactura << endl;
+    cout << "Serie asignada automáticamente: " << serie << endl;
+
+    // Obtener fecha actual para fecha de factura y fecha_ingreso
+    fechafactura = obtenerFechaHoraActual().substr(0, 10); // Solo la fecha, sin la hora
+    fecha_ingreso = obtenerFechaHoraActual();
+    cout << "Fecha de factura: " << fechafactura << endl;
+
     cout << "Ingrese ID de Empleado: ";
     cin >> idempleado;
-
-    // Obtener fecha actual para fecha_ingreso
-    fecha_ingreso = obtenerFechaHoraActual();
 
     // Usamos 0 como valor temporal para idVenta, ya que será generado por la base de datos
     Venta v = Venta(0, nofactura, serie, fechafactura, idcliente, idempleado, fecha_ingreso);
@@ -1521,8 +1168,29 @@ void ingresarVenta() {
         cin.ignore();
         cout << "Ingrese Cantidad: ";
         getline(cin, detalle.cantidad);
-        cout << "Ingrese Precio Unitario: ";
-        cin >> detalle.precio_unitario;
+
+        // Obtener precio de venta automáticamente de la base de datos
+        ConexionBD cn = ConexionBD();
+        cn.abrir_conexion();
+        if (cn.getConector()) {
+            string consulta = "SELECT precio_venta, producto FROM Productos WHERE idProducto = " + to_string(detalle.idProducto) + ";";
+            const char* sql = consulta.c_str();
+            mysql_query(cn.getConector(), sql);
+            MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+
+            if (resultado) {
+                MYSQL_ROW fila = mysql_fetch_row(resultado);
+                if (fila) {
+                    detalle.precio_unitario = atof(fila[0]);
+                    cout << "Producto: " << fila[1] << " - Precio: Q" << detalle.precio_unitario << endl;
+                } else {
+                    cout << "Producto no encontrado. Usando precio 0.00" << endl;
+                    detalle.precio_unitario = 0.0;
+                }
+                mysql_free_result(resultado);
+            }
+        }
+        cn.cerrar_conexion();
 
         v.agregarDetalle(detalle);
 
@@ -1873,7 +1541,1187 @@ void eliminarPuesto() {
     pausar();
 }
 
+// Función para el menú de detalles de compra
+void menuDetallesCompra() {
+    int opcion = 0;
+    do {
+        limpiarPantalla();
+        cout << "======================================\n";
+        cout << "      GESTIÓN DE DETALLES COMPRA     \n";
+        cout << "======================================\n\n";
+        cout << "1. Actualizar detalle de compra\n";
+        cout << "2. Eliminar detalle de compra\n";
+        cout << "0. Volver al menú de compras\n\n";
+        cout << "Ingrese una opción: ";
+        cin >> opcion;
+        cin.ignore();
 
+        switch (opcion) {
+            case 1:
+                actualizarDetalleCompra();
+                break;
+            case 2:
+                eliminarDetalleCompra();
+                break;
+            case 0:
+                // Volver al menú de compras
+                break;
+            default:
+                cout << "\nOpción no válida. Intente de nuevo.\n";
+                pausar();
+        }
+    } while (opcion != 0);
+}
+
+// Función para el menú de detalles de venta
+void menuDetallesVenta() {
+    int opcion = 0;
+    do {
+        limpiarPantalla();
+        cout << "======================================\n";
+        cout << "       GESTIÓN DE DETALLES VENTA     \n";
+        cout << "======================================\n\n";
+        cout << "1. Actualizar detalle de venta\n";
+        cout << "2. Eliminar detalle de venta\n";
+        cout << "0. Volver al menú de ventas\n\n";
+        cout << "Ingrese una opción: ";
+        cin >> opcion;
+        cin.ignore();
+
+        switch (opcion) {
+            case 1:
+                actualizarDetalleVenta();
+                break;
+            case 2:
+                eliminarDetalleVenta();
+                break;
+            case 0:
+                // Volver al menú de ventas
+                break;
+            default:
+                cout << "\nOpción no válida. Intente de nuevo.\n";
+                pausar();
+        }
+    } while (opcion != 0);
+}
+
+// Función para validar formato de NIT (versión simple para compatibilidad)
+string validarFormatoNIT(string nit) {
+    // Validación básica del NIT guatemalteco
+    if (nit == "C/F" || nit == "c/f") {
+        return "C/F"; // Consumidor final
+    }
+
+    // Eliminar espacios y guiones
+    string nitLimpio = "";
+    for (char c : nit) {
+        if (c != ' ' && c != '-') {
+            nitLimpio += c;
+        }
+    }
+
+    // Verificar que tenga entre 8 y 13 dígitos
+    if (nitLimpio.length() < 8 || nitLimpio.length() > 13) {
+        return ""; // NIT inválido
+    }
+
+    // Verificar que solo contenga dígitos
+    for (char c : nitLimpio) {
+        if (c < '0' || c > '9') {
+            return ""; // NIT inválido
+        }
+    }
+
+    return nitLimpio;
+}
+
+// Función para generar correlativo de factura automático
+string generarCorrelativoFactura() {
+    // Obtener fecha actual
+    time_t now = time(0);
+    struct tm timeinfo;
+    localtime_s(&timeinfo, &now);
+
+    // Generar número de factura basado en fecha y hora
+    int numeroFactura = (timeinfo.tm_year + 1900) * 10000 +
+                       (timeinfo.tm_mon + 1) * 100 +
+                       timeinfo.tm_mday;
+
+    return to_string(numeroFactura);
+}
+
+// Función para generar número de orden de compra automático
+string generarNumeroOrdenCompra() {
+    // Obtener fecha actual
+    time_t now = time(0);
+    struct tm timeinfo;
+    localtime_s(&timeinfo, &now);
+
+    // Generar número de orden basado en fecha y hora (diferente formato que factura)
+    int numeroOrden = (timeinfo.tm_year + 1900 - 2000) * 1000000 +  // Año en 2 dígitos
+                     (timeinfo.tm_mon + 1) * 10000 +                // Mes
+                     timeinfo.tm_mday * 100 +                       // Día
+                     timeinfo.tm_hour;                              // Hora
+
+    return to_string(numeroOrden);
+}
+
+// Función para formatear números como moneda con comas
+string formatearMoneda(double cantidad) {
+    // Convertir a string con 2 decimales
+    stringstream ss;
+    ss << fixed << setprecision(2) << cantidad;
+    string numero = ss.str();
+
+    // Encontrar la posición del punto decimal
+    size_t puntoDecimal = numero.find('.');
+    string parteEntera = numero.substr(0, puntoDecimal);
+    string parteDecimal = numero.substr(puntoDecimal);
+
+    // Agregar comas a la parte entera (de derecha a izquierda)
+    string resultado = "";
+    int contador = 0;
+
+    for (int i = parteEntera.length() - 1; i >= 0; i--) {
+        if (contador > 0 && contador % 3 == 0) {
+            resultado = "," + resultado;
+        }
+        resultado = parteEntera[i] + resultado;
+        contador++;
+    }
+
+    return "Q " + resultado + parteDecimal;
+}
+
+// Función para generar PDF nativo usando solo C++
+void generarFacturaPDF(int idcompra) {
+    ConexionBD cn = ConexionBD();
+    cn.abrir_conexion();
+
+    if (!cn.getConector()) {
+        cout << "Error en la conexión a la base de datos para generar factura.\n";
+        return;
+    }
+
+    // Crear carpeta facturas si no existe
+    system("if not exist \"facturas\" mkdir facturas");
+
+    // Obtener información de la compra
+    string consulta = "SELECT c.idcompra, c.no_order_compra, c.fecha_order, c.fecha_ingreso, "
+                     "p.proveedor, p.nit as proveedor_nit, p.direccion, p.telefono "
+                     "FROM Compras c "
+                     "INNER JOIN Proveedores p ON c.idproveedor = p.idProveedor "
+                     "WHERE c.idcompra = " + to_string(idcompra) + ";";
+
+    const char* sql = consulta.c_str();
+    int q_estado = mysql_query(cn.getConector(), sql);
+
+    if (q_estado) {
+        cout << "Error al consultar información de la compra.\n";
+        cn.cerrar_conexion();
+        return;
+    }
+
+    MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+    if (!resultado) {
+        cout << "Error al obtener resultados de la compra.\n";
+        cn.cerrar_conexion();
+        return;
+    }
+
+    MYSQL_ROW fila = mysql_fetch_row(resultado);
+    if (!fila) {
+        cout << "No se encontró la compra especificada.\n";
+        mysql_free_result(resultado);
+        cn.cerrar_conexion();
+        return;
+    }
+
+    // Generar nombre del archivo PDF
+    string nombreArchivoPDF = "facturas/factura_compra_" + to_string(idcompra) + ".pdf";
+
+    // Crear archivo PDF
+    ofstream pdf(nombreArchivoPDF, ios::binary);
+    if (!pdf.is_open()) {
+        cout << "Error al crear el archivo PDF.\n";
+        mysql_free_result(resultado);
+        cn.cerrar_conexion();
+        return;
+    }
+
+    // Escribir encabezado PDF
+    pdf << "%PDF-1.4\n";
+    pdf << "1 0 obj\n";
+    pdf << "<<\n";
+    pdf << "/Type /Catalog\n";
+    pdf << "/Pages 2 0 R\n";
+    pdf << ">>\n";
+    pdf << "endobj\n\n";
+
+    // Objeto de páginas
+    pdf << "2 0 obj\n";
+    pdf << "<<\n";
+    pdf << "/Type /Pages\n";
+    pdf << "/Kids [3 0 R]\n";
+    pdf << "/Count 1\n";
+    pdf << ">>\n";
+    pdf << "endobj\n\n";
+
+    // Página
+    pdf << "3 0 obj\n";
+    pdf << "<<\n";
+    pdf << "/Type /Page\n";
+    pdf << "/Parent 2 0 R\n";
+    pdf << "/MediaBox [0 0 612 792]\n";  // Tamaño carta
+    pdf << "/Contents 4 0 R\n";
+    pdf << "/Resources <<\n";
+    pdf << "/Font <<\n";
+    pdf << "/F1 5 0 R\n";
+    pdf << "/F2 6 0 R\n";
+    pdf << ">>\n";
+    pdf << ">>\n";
+    pdf << ">>\n";
+    pdf << "endobj\n\n";
+
+    // Preparar contenido de la página
+    stringstream contenido;
+
+    // Título centrado
+    contenido << "BT\n";
+    contenido << "/F2 20 Tf\n";
+    contenido << "180 750 Td\n";
+    contenido << "(FACTURA DE COMPRA) Tj\n";
+    contenido << "ET\n";
+
+    // Línea horizontal debajo del título
+    contenido << "50 735 m\n";
+    contenido << "550 735 l\n";
+    contenido << "S\n";
+
+    // Información de la factura (sin tabla, solo texto organizado)
+    contenido << "BT\n";
+    contenido << "/F2 12 Tf\n";
+    contenido << "50 710 Td\n";
+    contenido << "(No Factura: " << fila[1] << ") Tj\n";
+    contenido << "300 0 Td\n";
+    contenido << "(Fecha: " << fila[2] << ") Tj\n";
+    contenido << "ET\n";
+
+    contenido << "BT\n";
+    contenido << "/F1 11 Tf\n";
+    contenido << "50 690 Td\n";
+    contenido << "(NIT Proveedor: " << fila[5] << ") Tj\n";
+    contenido << "ET\n";
+
+    contenido << "BT\n";
+    contenido << "/F1 11 Tf\n";
+    contenido << "50 670 Td\n";
+    contenido << "(Proveedor: " << fila[4] << ") Tj\n";
+    contenido << "ET\n";
+
+    contenido << "BT\n";
+    contenido << "/F1 11 Tf\n";
+    contenido << "50 650 Td\n";
+    contenido << "(Direccion: " << fila[6] << ") Tj\n";
+    contenido << "ET\n";
+
+    contenido << "BT\n";
+    contenido << "/F1 11 Tf\n";
+    contenido << "50 630 Td\n";
+    contenido << "(Fecha Ingreso: " << fila[3] << ") Tj\n";
+    contenido << "ET\n";
+
+    mysql_free_result(resultado);
+
+    // Obtener detalles de la compra
+    string consultaDetalles = "SELECT cd.cantidad, p.producto, m.marca, cd.precio_unitario, "
+                             "(cd.cantidad * cd.precio_unitario) as subtotal "
+                             "FROM Compras_detalle cd "
+                             "INNER JOIN Productos p ON cd.idproducto = p.idProducto "
+                             "INNER JOIN Marcas m ON p.idMarca = m.idmarca "
+                             "WHERE cd.idcompra = " + to_string(idcompra) + ";";
+
+    const char* sqlDetalles = consultaDetalles.c_str();
+    q_estado = mysql_query(cn.getConector(), sqlDetalles);
+
+    if (!q_estado) {
+        MYSQL_RES* resultadoDetalles = mysql_store_result(cn.getConector());
+
+        // Título de productos
+        contenido << "BT\n";
+        contenido << "/F2 14 Tf\n";
+        contenido << "50 600 Td\n";
+        contenido << "(PRODUCTOS) Tj\n";
+        contenido << "ET\n";
+
+        // Línea debajo del título de productos
+        contenido << "50 590 m\n";
+        contenido << "550 590 l\n";
+        contenido << "S\n";
+
+        // Definir posiciones de columnas para la tabla
+        int col1 = 50;   // Cantidad
+        int col2 = 100;  // Producto
+        int col3 = 320;  // Marca
+        int col4 = 420;  // Precio Unitario
+        int col5 = 500;  // Subtotal
+        int colFin = 550; // Final de tabla
+
+        // Tabla de productos - Encabezado
+        int yTabla = 570;
+
+        // Líneas horizontales del encabezado
+        contenido << col1 << " " << yTabla << " m\n";
+        contenido << colFin << " " << yTabla << " l\n";
+        contenido << col1 << " " << (yTabla - 25) << " m\n";
+        contenido << colFin << " " << (yTabla - 25) << " l\n";
+        contenido << "S\n";
+
+        // Líneas verticales del encabezado
+        contenido << col1 << " " << yTabla << " m\n";
+        contenido << col1 << " " << (yTabla - 25) << " l\n";
+        contenido << col2 << " " << yTabla << " m\n";
+        contenido << col2 << " " << (yTabla - 25) << " l\n";
+        contenido << col3 << " " << yTabla << " m\n";
+        contenido << col3 << " " << (yTabla - 25) << " l\n";
+        contenido << col4 << " " << yTabla << " m\n";
+        contenido << col4 << " " << (yTabla - 25) << " l\n";
+        contenido << col5 << " " << yTabla << " m\n";
+        contenido << col5 << " " << (yTabla - 25) << " l\n";
+        contenido << colFin << " " << yTabla << " m\n";
+        contenido << colFin << " " << (yTabla - 25) << " l\n";
+        contenido << "S\n";
+
+        // Encabezados de la tabla
+        contenido << "BT\n";
+        contenido << "/F2 10 Tf\n";
+        contenido << (col1 + 15) << " " << (yTabla - 15) << " Td\n";
+        contenido << "(Cant.) Tj\n";
+        contenido << "ET\n";
+
+        contenido << "BT\n";
+        contenido << "/F2 10 Tf\n";
+        contenido << (col2 + 80) << " " << (yTabla - 15) << " Td\n";
+        contenido << "(Producto) Tj\n";
+        contenido << "ET\n";
+
+        contenido << "BT\n";
+        contenido << "/F2 10 Tf\n";
+        contenido << (col3 + 25) << " " << (yTabla - 15) << " Td\n";
+        contenido << "(Marca) Tj\n";
+        contenido << "ET\n";
+
+        contenido << "BT\n";
+        contenido << "/F2 10 Tf\n";
+        contenido << (col4 + 10) << " " << (yTabla - 15) << " Td\n";
+        contenido << "(P. Unit.) Tj\n";
+        contenido << "ET\n";
+
+        contenido << "BT\n";
+        contenido << "/F2 10 Tf\n";
+        contenido << (col5 + 10) << " " << (yTabla - 15) << " Td\n";
+        contenido << "(Subtotal) Tj\n";
+        contenido << "ET\n";
+
+        double total = 0.0;
+        int yPos = yTabla - 25;
+
+        if (resultadoDetalles) {
+            MYSQL_ROW filaDetalle;
+            while ((filaDetalle = mysql_fetch_row(resultadoDetalles))) {
+                double precioUnitario = atof(filaDetalle[3]);
+                double subtotal = atof(filaDetalle[4]);
+
+                // Líneas horizontales de la fila
+                contenido << col1 << " " << yPos << " m\n";
+                contenido << colFin << " " << yPos << " l\n";
+                contenido << col1 << " " << (yPos - 20) << " m\n";
+                contenido << colFin << " " << (yPos - 20) << " l\n";
+                contenido << "S\n";
+
+                // Líneas verticales de la fila
+                contenido << col1 << " " << yPos << " m\n";
+                contenido << col1 << " " << (yPos - 20) << " l\n";
+                contenido << col2 << " " << yPos << " m\n";
+                contenido << col2 << " " << (yPos - 20) << " l\n";
+                contenido << col3 << " " << yPos << " m\n";
+                contenido << col3 << " " << (yPos - 20) << " l\n";
+                contenido << col4 << " " << yPos << " m\n";
+                contenido << col4 << " " << (yPos - 20) << " l\n";
+                contenido << col5 << " " << yPos << " m\n";
+                contenido << col5 << " " << (yPos - 20) << " l\n";
+                contenido << colFin << " " << yPos << " m\n";
+                contenido << colFin << " " << (yPos - 20) << " l\n";
+                contenido << "S\n";
+
+                // Contenido de la fila - cada texto en su posición absoluta
+                contenido << "BT\n";
+                contenido << "/F1 9 Tf\n";
+                contenido << (col1 + 20) << " " << (yPos - 12) << " Td\n";
+                contenido << "(" << filaDetalle[0] << ") Tj\n";
+                contenido << "ET\n";
+
+                contenido << "BT\n";
+                contenido << "/F1 9 Tf\n";
+                contenido << (col2 + 5) << " " << (yPos - 12) << " Td\n";
+                contenido << "(" << filaDetalle[1] << ") Tj\n";
+                contenido << "ET\n";
+
+                contenido << "BT\n";
+                contenido << "/F1 9 Tf\n";
+                contenido << (col3 + 5) << " " << (yPos - 12) << " Td\n";
+                contenido << "(" << filaDetalle[2] << ") Tj\n";
+                contenido << "ET\n";
+
+                contenido << "BT\n";
+                contenido << "/F1 8 Tf\n";
+                contenido << (col4 + 5) << " " << (yPos - 12) << " Td\n";
+                contenido << "(" << formatearMoneda(precioUnitario) << ") Tj\n";
+                contenido << "ET\n";
+
+                contenido << "BT\n";
+                contenido << "/F1 8 Tf\n";
+                contenido << (col5 + 5) << " " << (yPos - 12) << " Td\n";
+                contenido << "(" << formatearMoneda(subtotal) << ") Tj\n";
+                contenido << "ET\n";
+
+                total += subtotal;
+                yPos -= 20;
+            }
+            mysql_free_result(resultadoDetalles);
+        }
+
+        // Fila del total
+        contenido << col1 << " " << yPos << " m\n";
+        contenido << colFin << " " << yPos << " l\n";
+        contenido << col1 << " " << (yPos - 25) << " m\n";
+        contenido << colFin << " " << (yPos - 25) << " l\n";
+        contenido << col4 << " " << yPos << " m\n";
+        contenido << col4 << " " << (yPos - 25) << " l\n";
+        contenido << col5 << " " << yPos << " m\n";
+        contenido << col5 << " " << (yPos - 25) << " l\n";
+        contenido << colFin << " " << yPos << " m\n";
+        contenido << colFin << " " << (yPos - 25) << " l\n";
+        contenido << "S\n";
+
+        // Texto del total
+        contenido << "BT\n";
+        contenido << "/F2 12 Tf\n";
+        contenido << (col4 + 15) << " " << (yPos - 15) << " Td\n";
+        contenido << "(TOTAL:) Tj\n";
+        contenido << "ET\n";
+
+        contenido << "BT\n";
+        contenido << "/F2 12 Tf\n";
+        contenido << (col5 + 5) << " " << (yPos - 15) << " Td\n";
+        contenido << "(" << formatearMoneda(total) << ") Tj\n";
+        contenido << "ET\n";
+
+        // Mensaje final
+        contenido << "BT\n";
+        contenido << "/F1 10 Tf\n";
+        contenido << "50 " << (yPos - 60) << " Td\n";
+        contenido << "(Gracias por su compra.) Tj\n";
+        contenido << "ET\n";
+    }
+
+    string contenidoStr = contenido.str();
+
+    // Objeto de contenido
+    pdf << "4 0 obj\n";
+    pdf << "<<\n";
+    pdf << "/Length " << contenidoStr.length() << "\n";
+    pdf << ">>\n";
+    pdf << "stream\n";
+    pdf << contenidoStr;
+    pdf << "endstream\n";
+    pdf << "endobj\n\n";
+
+    // Fuente normal
+    pdf << "5 0 obj\n";
+    pdf << "<<\n";
+    pdf << "/Type /Font\n";
+    pdf << "/Subtype /Type1\n";
+    pdf << "/BaseFont /Helvetica\n";
+    pdf << ">>\n";
+    pdf << "endobj\n\n";
+
+    // Fuente negrita
+    pdf << "6 0 obj\n";
+    pdf << "<<\n";
+    pdf << "/Type /Font\n";
+    pdf << "/Subtype /Type1\n";
+    pdf << "/BaseFont /Helvetica-Bold\n";
+    pdf << ">>\n";
+    pdf << "endobj\n\n";
+
+    // Tabla xref
+    long xrefPos = pdf.tellp();
+    pdf << "xref\n";
+    pdf << "0 7\n";
+    pdf << "0000000000 65535 f \n";
+    pdf << "0000000009 65535 n \n";
+    pdf << "0000000074 65535 n \n";
+    pdf << "0000000120 65535 n \n";
+    pdf << "0000000274 65535 n \n";
+    pdf << "0000000000 65535 n \n";  // Se calculará después
+    pdf << "0000000000 65535 n \n";  // Se calculará después
+
+    // Trailer
+    pdf << "trailer\n";
+    pdf << "<<\n";
+    pdf << "/Size 7\n";
+    pdf << "/Root 1 0 R\n";
+    pdf << ">>\n";
+    pdf << "startxref\n";
+    pdf << xrefPos << "\n";
+    pdf << "%%EOF\n";
+
+    pdf.close();
+    cn.cerrar_conexion();
+
+    cout << "\n=== FACTURA PDF GENERADA ===\n";
+    cout << "✓ PDF generado exitosamente: " << nombreArchivoPDF << endl;
+
+    // Intentar abrir el PDF
+    string comandoAbrir = "start \"\" \"" + nombreArchivoPDF + "\"";
+    if (system(comandoAbrir.c_str()) == 0) {
+        cout << "✓ El PDF se ha abierto exitosamente.\n";
+    } else {
+        cout << "PDF guardado en: " << nombreArchivoPDF << endl;
+        cout << "Puede encontrarlo en la carpeta 'facturas'.\n";
+    }
+}
+
+// Función para generar factura de compra en HTML
+void generarFacturaCompra(int idcompra) {
+    ConexionBD cn = ConexionBD();
+    cn.abrir_conexion();
+
+    if (!cn.getConector()) {
+        cout << "Error en la conexión a la base de datos para generar factura.\n";
+        return;
+    }
+
+    // Crear carpeta facturas si no existe
+    system("if not exist \"facturas\" mkdir facturas");
+
+    // Obtener información de la compra
+    string consulta = "SELECT c.idcompra, c.no_order_compra, c.fecha_order, c.fecha_ingreso, "
+                     "p.proveedor, p.nit as proveedor_nit, p.direccion, p.telefono "
+                     "FROM Compras c "
+                     "INNER JOIN Proveedores p ON c.idproveedor = p.idProveedor "
+                     "WHERE c.idcompra = " + to_string(idcompra) + ";";
+
+    const char* sql = consulta.c_str();
+    int q_estado = mysql_query(cn.getConector(), sql);
+
+    if (q_estado) {
+        cout << "Error al consultar información de la compra.\n";
+        cn.cerrar_conexion();
+        return;
+    }
+
+    MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+    if (!resultado) {
+        cout << "Error al obtener resultados de la compra.\n";
+        cn.cerrar_conexion();
+        return;
+    }
+
+    MYSQL_ROW fila = mysql_fetch_row(resultado);
+    if (!fila) {
+        cout << "No se encontró la compra especificada.\n";
+        mysql_free_result(resultado);
+        cn.cerrar_conexion();
+        return;
+    }
+
+    // Generar nombres de archivos
+    string nombreArchivoHTML = "facturas/factura_compra_" + to_string(idcompra) + ".html";
+    string nombreArchivoPDF = "facturas/factura_compra_" + to_string(idcompra) + ".pdf";
+
+    // Crear archivo HTML
+    ofstream archivo(nombreArchivoHTML);
+    if (!archivo.is_open()) {
+        cout << "Error al crear el archivo de factura.\n";
+        mysql_free_result(resultado);
+        cn.cerrar_conexion();
+        return;
+    }
+
+    // Escribir HTML de la factura
+    archivo << "<!DOCTYPE html>\n";
+    archivo << "<html>\n<head>\n";
+    archivo << "<meta charset='UTF-8'>\n";
+    archivo << "<title>Factura de Compra #" << fila[1] << "</title>\n";
+    archivo << "<style>\n";
+    archivo << "@media print { body { margin: 0; } }\n";
+    archivo << "body { font-family: Arial, sans-serif; margin: 20px; font-size: 12px; }\n";
+    archivo << "table { border-collapse: collapse; width: 100%; margin-top: 10px; }\n";
+    archivo << "th, td { border: 1px solid #000; padding: 8px; text-align: left; }\n";
+    archivo << "th { background-color: #f0f0f0; font-weight: bold; }\n";
+    archivo << ".header { text-align: center; margin-bottom: 20px; }\n";
+    archivo << ".header h1 { margin: 10px 0; font-size: 24px; }\n";
+    archivo << ".info-table { width: 100%; margin-bottom: 20px; }\n";
+    archivo << ".total { font-weight: bold; background-color: #f0f0f0; }\n";
+    archivo << ".money { text-align: right; }\n";
+    archivo << ".center { text-align: center; }\n";
+    archivo << "</style>\n</head>\n<body>\n";
+
+    archivo << "<div class='header'>\n";
+    archivo << "<h1>FACTURA DE COMPRA</h1>\n";
+    archivo << "</div>\n";
+
+    archivo << "<table class='info-table'>\n";
+    archivo << "<tr><td><strong>No Factura</strong></td><td>" << fila[1] << "</td><td><strong>Fecha:</strong></td><td>" << fila[2] << "</td></tr>\n";
+    archivo << "<tr><td><strong>NIT Proveedor</strong></td><td>" << fila[5] << "</td><td><strong>Fecha Ingreso:</strong></td><td>" << fila[3] << "</td></tr>\n";
+    archivo << "<tr><td><strong>Proveedor</strong></td><td colspan='3'>" << fila[4] << "</td></tr>\n";
+    archivo << "<tr><td><strong>Dirección</strong></td><td colspan='3'>" << fila[6] << "</td></tr>\n";
+    archivo << "</table>\n";
+
+    mysql_free_result(resultado);
+
+    // Obtener detalles de la compra
+    string consultaDetalles = "SELECT cd.cantidad, p.producto, m.marca, cd.precio_unitario, "
+                             "(cd.cantidad * cd.precio_unitario) as subtotal "
+                             "FROM Compras_detalle cd "
+                             "INNER JOIN Productos p ON cd.idproducto = p.idProducto "
+                             "INNER JOIN Marcas m ON p.idMarca = m.idmarca "
+                             "WHERE cd.idcompra = " + to_string(idcompra) + ";";
+
+    const char* sqlDetalles = consultaDetalles.c_str();
+    q_estado = mysql_query(cn.getConector(), sqlDetalles);
+
+    if (!q_estado) {
+        MYSQL_RES* resultadoDetalles = mysql_store_result(cn.getConector());
+
+        archivo << "<h3>PRODUCTOS</h3>\n";
+        archivo << "<table>\n";
+        archivo << "<tr><th class='center'>Cantidad</th><th>Producto</th><th>Marca</th><th class='money'>Precio Unitario</th><th class='money'>Subtotal</th></tr>\n";
+
+        double total = 0.0;
+        if (resultadoDetalles) {
+            MYSQL_ROW filaDetalle;
+            while ((filaDetalle = mysql_fetch_row(resultadoDetalles))) {
+                double precioUnitario = atof(filaDetalle[3]);
+                double subtotal = atof(filaDetalle[4]);
+
+                archivo << "<tr>";
+                archivo << "<td class='center'>" << filaDetalle[0] << "</td>";
+                archivo << "<td>" << filaDetalle[1] << "</td>";
+                archivo << "<td>" << filaDetalle[2] << "</td>";
+                archivo << "<td class='money'>" << formatearMoneda(precioUnitario) << "</td>";
+                archivo << "<td class='money'>" << formatearMoneda(subtotal) << "</td>";
+                archivo << "</tr>\n";
+                total += subtotal;
+            }
+            mysql_free_result(resultadoDetalles);
+        }
+
+        archivo << "<tr class='total'><td colspan='4'><strong>Total:</strong></td><td class='money'><strong>" << formatearMoneda(total) << "</strong></td></tr>\n";
+        archivo << "</table>\n";
+
+        archivo << "<p style='margin-top: 20px;'><strong>Gracias por su compra.</strong></p>\n";
+    }
+
+    archivo << "</body>\n</html>";
+    archivo.close();
+    cn.cerrar_conexion();
+
+    cout << "\n=== FACTURA GENERADA ===\n";
+    cout << "Archivo HTML: " << nombreArchivoHTML << endl;
+
+    // Función para verificar si un archivo existe
+    auto archivoExiste = [](const string& ruta) -> bool {
+        ifstream archivo(ruta);
+        return archivo.good();
+    };
+
+    // Intentar convertir a PDF usando diferentes métodos
+    bool pdfGenerado = false;
+
+    // Método 1: Intentar usar wkhtmltopdf si está disponible
+    cout << "Intentando generar PDF...\n";
+    string comandoPDF1 = "wkhtmltopdf --page-size A4 --margin-top 0.75in --margin-right 0.75in --margin-bottom 0.75in --margin-left 0.75in \"" + nombreArchivoHTML + "\" \"" + nombreArchivoPDF + "\" >nul 2>&1";
+    system(comandoPDF1.c_str());
+
+    // Verificar si realmente se creó el PDF
+    if (archivoExiste(nombreArchivoPDF)) {
+        pdfGenerado = true;
+        cout << "✓ PDF generado exitosamente: " << nombreArchivoPDF << endl;
+    }
+
+    // Si se generó PDF, intentar abrirlo
+    if (pdfGenerado) {
+        string comandoAbrir = "start \"\" \"" + nombreArchivoPDF + "\"";
+        if (system(comandoAbrir.c_str()) == 0) {
+            cout << "✓ El PDF se ha abierto exitosamente.\n";
+        } else {
+            cout << "PDF guardado en: " << nombreArchivoPDF << endl;
+            cout << "No se pudo abrir automáticamente. Puede encontrarlo en la carpeta 'facturas'.\n";
+        }
+    } else {
+        // Si no se pudo generar PDF, abrir HTML con instrucciones claras
+        cout << "⚠ No se pudo generar PDF automáticamente.\n";
+        cout << "Esto puede deberse a que wkhtmltopdf no está instalado.\n\n";
+        cout << "OPCIONES PARA GENERAR PDF:\n";
+        cout << "1. Abriendo archivo HTML para convertir manualmente...\n";
+
+        string comandoHTML = "start \"\" \"" + nombreArchivoHTML + "\"";
+        system(comandoHTML.c_str());
+
+        cout << "\n📋 INSTRUCCIONES PARA GENERAR PDF:\n";
+        cout << "   • En el navegador que se abrió, presione Ctrl+P\n";
+        cout << "   • En 'Destino', seleccione 'Guardar como PDF' o 'Microsoft Print to PDF'\n";
+        cout << "   • Ajuste los márgenes si es necesario\n";
+        cout << "   • Haga clic en 'Guardar'\n";
+        cout << "   • Guarde el archivo como: factura_compra_" << idcompra << ".pdf\n";
+        cout << "   • Guárdelo en la carpeta 'facturas'\n\n";
+        cout << "2. Para conversión automática futura:\n";
+        cout << "   • Instale wkhtmltopdf desde: https://wkhtmltopdf.org/downloads.html\n";
+        cout << "   • Agregue wkhtmltopdf al PATH del sistema\n";
+        cout << "   • Reinicie el programa\n\n";
+        cout << "3. El archivo HTML siempre estará disponible en: " << nombreArchivoHTML << "\n";
+    }
+}
+
+// Función para buscar cliente por NIT
+void buscarClientePorNIT() {
+    limpiarPantalla();
+    cout << "===== BUSCAR CLIENTE POR NIT =====\n\n";
+
+    string nitBuscar;
+    cout << "Ingrese el NIT del cliente a buscar: ";
+    getline(cin, nitBuscar);
+
+    // Validar formato del NIT
+    string nitValidado = validarFormatoNIT(nitBuscar);
+    if (nitValidado.empty()) {
+        cout << "Formato de NIT inválido. Intente nuevamente.\n";
+        cout << "El NIT debe tener entre 8 y 13 dígitos o ser 'C/F' para consumidor final.\n";
+        pausar();
+        return;
+    }
+
+    cout << "Buscando cliente con NIT: " << nitValidado << endl;
+
+    // Buscar en la base de datos
+    ConexionBD cn = ConexionBD();
+    cn.abrir_conexion();
+    if (cn.getConector()) {
+        string consulta = "SELECT idCliente, nombres, apellidos, NIT, telefono, correo_electronico FROM Clientes WHERE NIT = '" + nitValidado + "';";
+        const char* sql = consulta.c_str();
+
+        cout << "Ejecutando consulta: " << consulta << endl;
+
+        int q_estado = mysql_query(cn.getConector(), sql);
+        if (!q_estado) {
+            MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+
+            if (resultado) {
+                int num_filas = mysql_num_rows(resultado);
+                cout << "Número de registros encontrados: " << num_filas << endl;
+
+                MYSQL_ROW fila = mysql_fetch_row(resultado);
+
+                if (fila) {
+                    cout << "\n=== CLIENTE ENCONTRADO ===\n";
+                    cout << "ID: " << fila[0] << endl;
+                    cout << "Nombre completo: " << fila[1] << " " << fila[2] << endl;
+                    cout << "NIT: " << fila[3] << endl;
+                    cout << "Teléfono: " << (fila[4] ? fila[4] : "No especificado") << endl;
+                    cout << "Correo: " << (fila[5] ? fila[5] : "No especificado") << endl;
+                } else {
+                    cout << "\nNo se encontró ningún cliente con el NIT: " << nitValidado << endl;
+                    cout << "¿Desea crear un nuevo cliente? (S/N): ";
+                    char respuesta;
+                    cin >> respuesta;
+                    cin.ignore();
+
+                    if (respuesta == 'S' || respuesta == 's') {
+                        ingresarCliente();
+                    }
+                }
+
+                mysql_free_result(resultado);
+            } else {
+                cout << "Error al obtener resultados de la consulta.\n";
+            }
+        } else {
+            cout << "Error al ejecutar la consulta: " << mysql_error(cn.getConector()) << endl;
+        }
+    } else {
+        cout << "Error en la conexión a la base de datos.\n";
+    }
+    cn.cerrar_conexion();
+
+    pausar();
+}
+
+// Función para imprimir factura
+void imprimirFactura() {
+    limpiarPantalla();
+    cout << "===== IMPRIMIR FACTURA =====\n\n";
+
+    // Mostrar ventas disponibles
+    cout << "Ventas disponibles:\n";
+    Venta v = Venta();
+    v.leer();
+
+    int idVenta = 0;
+    cout << "\nIngrese el ID de la venta para imprimir factura: ";
+    cin >> idVenta;
+
+    // Obtener información de la venta y cliente
+    ConexionBD cn = ConexionBD();
+    cn.abrir_conexion();
+    if (cn.getConector()) {
+        // Consulta para obtener información completa de la venta
+        string consulta = "SELECT v.nofactura, v.serie, v.fechafactura, "
+                         "c.nombres, c.apellidos, c.NIT, "
+                         "e.nombres as emp_nombres, e.apellidos as emp_apellidos "
+                         "FROM Ventas v "
+                         "INNER JOIN Clientes c ON v.idcliente = c.idCliente "
+                         "INNER JOIN Empleados e ON v.idempleado = e.idEmpleado "
+                         "WHERE v.idVenta = " + to_string(idVenta) + ";";
+
+        const char* sql = consulta.c_str();
+        mysql_query(cn.getConector(), sql);
+        MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+
+        if (resultado) {
+            MYSQL_ROW fila = mysql_fetch_row(resultado);
+            if (fila) {
+                // Imprimir encabezado de factura
+                cout << "\n======================================\n";
+                cout << "              FACTURA                 \n";
+                cout << "======================================\n";
+                cout << "No Factura: " << fila[0] << "        Fecha: " << fila[2] << "\n";
+                cout << "Serie: " << fila[1] << "\n";
+                cout << "NIT: " << fila[5] << "\n";
+                cout << "Cliente: " << fila[3] << " " << fila[4] << "\n";
+                cout << "Atendido por: " << fila[6] << " " << fila[7] << "\n";
+                cout << "======================================\n";
+                cout << "                PRODUCTOS             \n";
+                cout << "======================================\n";
+
+                // Obtener detalles de la venta con información de productos
+                string consultaDetalles = "SELECT vd.cantidad, p.producto, m.marca, p.precio_venta, "
+                                         "(CAST(vd.cantidad AS DECIMAL(10,2)) * vd.precio_unitario) as subtotal "
+                                         "FROM Ventas_detalle vd "
+                                         "INNER JOIN Productos p ON vd.idProducto = p.idProducto "
+                                         "INNER JOIN Marcas m ON p.idMarca = m.idmarca "
+                                         "WHERE vd.idventa = " + to_string(idVenta) + ";";
+
+                const char* sqlDetalles = consultaDetalles.c_str();
+                mysql_query(cn.getConector(), sqlDetalles);
+                MYSQL_RES* resultadoDetalles = mysql_store_result(cn.getConector());
+
+                double total = 0.0;
+                if (resultadoDetalles) {
+                    MYSQL_ROW filaDetalle;
+                    while ((filaDetalle = mysql_fetch_row(resultadoDetalles))) {
+                        cout << filaDetalle[0] << " - " << filaDetalle[1]
+                             << " marca " << filaDetalle[2]
+                             << "    Q " << filaDetalle[3] << "\n";
+                        total += atof(filaDetalle[4]);
+                    }
+                    mysql_free_result(resultadoDetalles);
+                }
+
+                cout << "======================================\n";
+                cout << "Total:                    Q " << fixed << setprecision(2) << total << "\n";
+                cout << "======================================\n";
+                cout << "Gracias por su compra.\n";
+                cout << "======================================\n";
+            } else {
+                cout << "No se encontró la venta especificada.\n";
+            }
+            mysql_free_result(resultado);
+        }
+    } else {
+        cout << "Error en la conexión a la base de datos.\n";
+    }
+    cn.cerrar_conexion();
+
+    pausar();
+}
+
+// Implementaciones de funciones para detalles de compra
+void actualizarDetalleCompra() {
+    limpiarPantalla();
+    cout << "===== ACTUALIZAR DETALLE DE COMPRA =====\n\n";
+
+    // Mostrar todas las compras primero
+    Compra c = Compra();
+    c.leer();
+
+    int idcompra = 0;
+    cout << "\nIngrese el ID de la compra para ver sus detalles: ";
+    cin >> idcompra;
+
+    // Mostrar detalles de la compra seleccionada
+    c.leerDetalles(idcompra);
+
+    int idcompra_detalle = 0;
+    cout << "\nIngrese el ID del detalle de compra a modificar: ";
+    cin >> idcompra_detalle;
+
+    // Mostrar productos disponibles
+    cout << "\nProductos disponibles:\n";
+    Producto prod = Producto();
+    prod.leer();
+
+    int idproducto = 0, cantidad = 0;
+    double precio_unitario = 0.0;
+
+    cout << "\nIngrese Nuevo ID de Producto: ";
+    cin >> idproducto;
+    cout << "Ingrese Nueva Cantidad: ";
+    cin >> cantidad;
+
+    // Obtener precio de costo automáticamente de la base de datos
+    ConexionBD cn = ConexionBD();
+    cn.abrir_conexion();
+    if (cn.getConector()) {
+        string consulta = "SELECT precio_costo, producto FROM Productos WHERE idProducto = " + to_string(idproducto) + ";";
+        const char* sql = consulta.c_str();
+        mysql_query(cn.getConector(), sql);
+        MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+
+        if (resultado) {
+            MYSQL_ROW fila = mysql_fetch_row(resultado);
+            if (fila) {
+                precio_unitario = atof(fila[0]);
+                cout << "Producto: " << fila[1] << " - Precio de costo: Q" << precio_unitario << endl;
+            } else {
+                cout << "Producto no encontrado. Usando precio 0.00" << endl;
+                precio_unitario = 0.0;
+            }
+            mysql_free_result(resultado);
+        }
+
+        // Actualizar en la base de datos
+        string id = to_string(idcompra_detalle);
+        string idprod = to_string(idproducto);
+        string cant = to_string(cantidad);
+        string pu = to_string(precio_unitario);
+
+        string consultaUpdate = "UPDATE Compras_detalle SET idproducto = " + idprod + ", cantidad = " + cant + ", precio_unitario = " + pu + " WHERE idcompra_detalle = " + id + ";";
+        const char* c = consultaUpdate.c_str();
+        int q_estado = mysql_query(cn.getConector(), c);
+        if (!q_estado) {
+            cout << "\nActualización de Detalle de Compra Exitosa..." << endl;
+            cout << "\nDetalles actualizados:\n";
+            Compra comp = Compra();
+            comp.leerDetalles(idcompra);
+        }
+        else {
+            cout << "xxx Error al actualizar detalle de compra xxx" << endl;
+            cout << consultaUpdate << endl;
+        }
+    }
+    else {
+        cout << "xxx Error en la conexión xxx" << endl;
+    }
+    cn.cerrar_conexion();
+
+    pausar();
+}
+
+void eliminarDetalleCompra() {
+    limpiarPantalla();
+    cout << "===== ELIMINAR DETALLE DE COMPRA =====\n\n";
+
+    // Mostrar todas las compras primero
+    Compra c = Compra();
+    c.leer();
+
+    int idcompra = 0;
+    cout << "\nIngrese el ID de la compra para ver sus detalles: ";
+    cin >> idcompra;
+
+    // Mostrar detalles de la compra seleccionada
+    c.leerDetalles(idcompra);
+
+    int idcompra_detalle = 0;
+    cout << "\nIngrese el ID del detalle de compra a eliminar: ";
+    cin >> idcompra_detalle;
+
+    char confirmar;
+    cout << "¿Está seguro de eliminar este detalle de compra? (S/N): ";
+    cin >> confirmar;
+
+    if (confirmar == 'S' || confirmar == 's') {
+        // Eliminar de la base de datos
+        int q_estado = 0;
+        ConexionBD cn = ConexionBD();
+        cn.abrir_conexion();
+        if (cn.getConector()) {
+            string id = to_string(idcompra_detalle);
+            string consulta = "DELETE FROM Compras_detalle WHERE idcompra_detalle = " + id + ";";
+            const char* c = consulta.c_str();
+            q_estado = mysql_query(cn.getConector(), c);
+            if (!q_estado) {
+                cout << "\nEliminación de Detalle de Compra Exitosa..." << endl;
+                cout << "\nDetalles actualizados:\n";
+                Compra comp = Compra();
+                comp.leerDetalles(idcompra);
+            }
+            else {
+                cout << "xxx Error al eliminar detalle de compra xxx" << endl;
+                cout << consulta << endl;
+            }
+        }
+        else {
+            cout << "xxx Error en la conexión xxx" << endl;
+        }
+        cn.cerrar_conexion();
+    } else {
+        cout << "\nOperación cancelada.\n";
+    }
+
+    pausar();
+}
+
+// Implementaciones de funciones para detalles de venta
+void actualizarDetalleVenta() {
+    limpiarPantalla();
+    cout << "===== ACTUALIZAR DETALLE DE VENTA =====\n\n";
+
+    // Mostrar todas las ventas primero
+    Venta v = Venta();
+    v.leer();
+
+    int idventa = 0;
+    cout << "\nIngrese el ID de la venta para ver sus detalles: ";
+    cin >> idventa;
+
+    // Mostrar detalles de la venta seleccionada
+    v.leerDetalles(idventa);
+
+    int idventa_detalle = 0;
+    cout << "\nIngrese el ID del detalle de venta a modificar: ";
+    cin >> idventa_detalle;
+
+    // Mostrar productos disponibles
+    cout << "\nProductos disponibles:\n";
+    Producto prod = Producto();
+    prod.leer();
+
+    int idProducto = 0;
+    string cantidad;
+    double precio_unitario = 0.0;
+
+    cout << "\nIngrese Nuevo ID de Producto: ";
+    cin >> idProducto;
+    cin.ignore();
+    cout << "Ingrese Nueva Cantidad: ";
+    getline(cin, cantidad);
+
+    // Obtener precio de venta automáticamente de la base de datos
+    ConexionBD cn = ConexionBD();
+    cn.abrir_conexion();
+    if (cn.getConector()) {
+        string consulta = "SELECT precio_venta, producto FROM Productos WHERE idProducto = " + to_string(idProducto) + ";";
+        const char* sql = consulta.c_str();
+        mysql_query(cn.getConector(), sql);
+        MYSQL_RES* resultado = mysql_store_result(cn.getConector());
+
+        if (resultado) {
+            MYSQL_ROW fila = mysql_fetch_row(resultado);
+            if (fila) {
+                precio_unitario = atof(fila[0]);
+                cout << "Producto: " << fila[1] << " - Precio de venta: Q" << precio_unitario << endl;
+            } else {
+                cout << "Producto no encontrado. Usando precio 0.00" << endl;
+                precio_unitario = 0.0;
+            }
+            mysql_free_result(resultado);
+        }
+
+        // Actualizar en la base de datos
+        string id = to_string(idventa_detalle);
+        string idprod = to_string(idProducto);
+        string pu = to_string(precio_unitario);
+
+        string consultaUpdate = "UPDATE Ventas_detalle SET idProducto = " + idprod + ", cantidad = '" + cantidad + "', precio_unitario = " + pu + " WHERE idventa_detalle = " + id + ";";
+        const char* c = consultaUpdate.c_str();
+        int q_estado = mysql_query(cn.getConector(), c);
+        if (!q_estado) {
+            cout << "\nActualización de Detalle de Venta Exitosa..." << endl;
+            cout << "\nDetalles actualizados:\n";
+            Venta vent = Venta();
+            vent.leerDetalles(idventa);
+        }
+        else {
+            cout << "xxx Error al actualizar detalle de venta xxx" << endl;
+            cout << consultaUpdate << endl;
+        }
+    }
+    else {
+        cout << "xxx Error en la conexión xxx" << endl;
+    }
+    cn.cerrar_conexion();
+
+    pausar();
+}
+
+void eliminarDetalleVenta() {
+    limpiarPantalla();
+    cout << "===== ELIMINAR DETALLE DE VENTA =====\n\n";
+
+    // Mostrar todas las ventas primero
+    Venta v = Venta();
+    v.leer();
+
+    int idventa = 0;
+    cout << "\nIngrese el ID de la venta para ver sus detalles: ";
+    cin >> idventa;
+
+    // Mostrar detalles de la venta seleccionada
+    v.leerDetalles(idventa);
+
+    int idventa_detalle = 0;
+    cout << "\nIngrese el ID del detalle de venta a eliminar: ";
+    cin >> idventa_detalle;
+
+    char confirmar;
+    cout << "¿Está seguro de eliminar este detalle de venta? (S/N): ";
+    cin >> confirmar;
+
+    if (confirmar == 'S' || confirmar == 's') {
+        // Eliminar de la base de datos
+        int q_estado = 0;
+        ConexionBD cn = ConexionBD();
+        cn.abrir_conexion();
+        if (cn.getConector()) {
+            string id = to_string(idventa_detalle);
+            string consulta = "DELETE FROM Ventas_detalle WHERE idventa_detalle = " + id + ";";
+            const char* c = consulta.c_str();
+            q_estado = mysql_query(cn.getConector(), c);
+            if (!q_estado) {
+                cout << "\nEliminación de Detalle de Venta Exitosa..." << endl;
+                cout << "\nDetalles actualizados:\n";
+                Venta vent = Venta();
+                vent.leerDetalles(idventa);
+            }
+            else {
+                cout << "xxx Error al eliminar detalle de venta xxx" << endl;
+                cout << consulta << endl;
+            }
+        }
+        else {
+            cout << "xxx Error en la conexión xxx" << endl;
+        }
+        cn.cerrar_conexion();
+    } else {
+        cout << "\nOperación cancelada.\n";
+    }
+
+    pausar();
+}
 
 int main() {
     SetConsoleOutputCP(CP_UTF8);
@@ -1893,9 +2741,7 @@ int main() {
         cout << "5. Gestión de Empleados\n";
         cout << "6. Gestión de Clientes\n";
         cout << "7. Gestión de Compras\n";
-        cout << "8. Gestión de Detalles de Compras\n";
-        cout << "9. Gestión de Ventas\n";
-        cout << "10. Gestión de Detalles de Ventas\n";
+        cout << "8. Gestión de Ventas\n";
         cout << "0. Salir\n\n";
         cout << "Ingrese una opción: ";
         cin >> opcion;
@@ -1924,13 +2770,7 @@ int main() {
                 menuCompras();
                 break;
             case 8:
-                menuDetallesCompra();
-                break;
-            case 9:
                 menuVentas();
-                break;
-            case 10:
-                menuDetallesVenta();
                 break;
             case 0:
                 cout << "\nGracias por usar el sistema. ¡Hasta pronto!\n";

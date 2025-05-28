@@ -141,7 +141,6 @@
     <ClCompile Include="Empleado.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Marca.cpp" />
-    <ClCompile Include="Persona.cpp" />
     <ClCompile Include="Producto.cpp" />
     <ClCompile Include="Proveedor.cpp" />
     <ClCompile Include="Puesto.cpp" />
@@ -153,7 +152,6 @@
     <ClInclude Include="ConexionBD.h" />
     <ClInclude Include="Empleado.h" />
     <ClInclude Include="Marca.h" />
-    <ClInclude Include="Persona.h" />
     <ClInclude Include="Producto.h" />
     <ClInclude Include="Proveedor.h" />
     <ClInclude Include="Puesto.h" />
