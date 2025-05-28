@@ -144,6 +144,7 @@
     <ClCompile Include="Producto.cpp" />
     <ClCompile Include="Proveedor.cpp" />
     <ClCompile Include="Puesto.cpp" />
+    <ClCompile Include="test_compile.cpp" />
     <ClCompile Include="Venta.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -156,6 +157,15 @@
     <ClInclude Include="Proveedor.h" />
     <ClInclude Include="Puesto.h" />
     <ClInclude Include="Venta.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libcrypto-3-x64.dll" />
+    <None Include="libmysql.dll" />
+    <None Include="libssl-3-x64.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="libmysql.lib" />
+    <Library Include="mysqlcppconn.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

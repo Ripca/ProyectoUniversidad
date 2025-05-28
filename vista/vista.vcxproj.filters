@@ -45,6 +45,9 @@
     <ClCompile Include="Venta.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
+    <ClCompile Include="test_compile.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConexionBD.h">
@@ -74,5 +77,14 @@
     <ClInclude Include="Venta.h">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="libcrypto-3-x64.dll" />
+    <None Include="libmysql.dll" />
+    <None Include="libssl-3-x64.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="libmysql.lib" />
+    <Library Include="mysqlcppconn.lib" />
   </ItemGroup>
 </Project>
