@@ -144,7 +144,6 @@
     <ClCompile Include="Producto.cpp" />
     <ClCompile Include="Proveedor.cpp" />
     <ClCompile Include="Puesto.cpp" />
-    <ClCompile Include="test_compile.cpp" />
     <ClCompile Include="Venta.cpp" />
   </ItemGroup>
   <ItemGroup>
