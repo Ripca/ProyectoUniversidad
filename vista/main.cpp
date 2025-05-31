@@ -86,7 +86,7 @@ void eliminarEmpleado();
 // Funciones para Cliente
 void menuClientes();
 void ingresarCliente();
-void ingresarClienteConNIT(const string& nitPreestablecido);
+bool ingresarClienteConNIT(const string& nitPreestablecido);
 void mostrarClientes();
 void actualizarCliente();
 void eliminarCliente();
@@ -691,35 +691,61 @@ void ingresarCliente() {
     pausar();
 }
 
-void ingresarClienteConNIT(const string& nitPreestablecido) {
+bool ingresarClienteConNIT(const string& nitPreestablecido) {
     limpiarPantalla();
     cout << "===== CREAR NUEVO CLIENTE =====\n\n";
-    cout << "NIT: " << nitPreestablecido<<" \n";
+    cout << "NIT: " << nitPreestablecido << " \n";
 
-    string nombres, apellidos, telefono, correo_electronico, fecha_ingreso;
-    bool genero = false;
-    char gen;
+    try {
+        string nombres, apellidos, telefono, correo_electronico, fecha_ingreso;
+        bool genero = false;
+        char gen;
 
-    nombres = validarTextoNoVacio("Ingrese Nombres: ");
-    apellidos = validarTextoNoVacio("Ingrese Apellidos: ");
+        nombres = validarTextoNoVacio("Ingrese Nombres: ");
+        apellidos = validarTextoNoVacio("Ingrese Apellidos: ");
 
-    cout << "Ingrese Genero (M/F): ";
-    cin >> gen;
-    genero = (gen == 'M' || gen == 'm') ? true : false;
-    cin.ignore();
+        cout << "Ingrese Genero (M/F): ";
+        cin >> gen;
+        genero = (gen == 'M' || gen == 'm') ? true : false;
+        cin.ignore();
 
-    telefono = validarTextoNoVacio("Ingrese Telefono: ");
-    correo_electronico = validarTextoNoVacio("Ingrese Correo Electronico: ");
+        telefono = validarTextoNoVacio("Ingrese Telefono: ");
+        correo_electronico = validarTextoNoVacio("Ingrese Correo Electronico: ");
 
-    // Obtener fecha actual para fecha_ingreso
-    fecha_ingreso = obtenerFechaHoraActual();
+        // Obtener fecha actual para fecha_ingreso
+        fecha_ingreso = obtenerFechaHoraActual();
 
-    // Usamos 0 como valor temporal para idCliente, ya que será generado por la base de datos
-    Cliente c = Cliente(0, nombres, apellidos, nitPreestablecido, genero, telefono, correo_electronico, fecha_ingreso);
-    c.crear();
+        // Crear cliente directamente con consulta SQL para mejor control
+        ConexionBD cn = ConexionBD();
+        cn.abrir_conexion();
+        if (!cn.getConector()) {
+            cout << "Error: No se pudo conectar a la base de datos.\n";
+            pausar();
+            return false;
+        }
 
-    cout << "\nCliente creado exitosamente con NIT: " << nitPreestablecido << endl;
-    pausar();
+        string gen_str = genero ? "1" : "0";
+        string consulta = "INSERT INTO Clientes(nombres, apellidos, NIT, genero, telefono, correo_electronico, fecha_ingreso) VALUES ('" +
+                         nombres + "', '" + apellidos + "', '" + nitPreestablecido + "', " + gen_str + ", '" +
+                         telefono + "', '" + correo_electronico + "', '" + fecha_ingreso + "');";
+
+        int q_estado = mysql_query(cn.getConector(), consulta.c_str());
+        cn.cerrar_conexion();
+
+        if (q_estado == 0) {
+            cout << "\nCliente creado exitosamente con NIT: " << nitPreestablecido << endl;
+            pausar();
+            return true;
+        } else {
+            cout << "Error al crear el cliente.\n";
+            pausar();
+            return false;
+        }
+    } catch (const exception& e) {
+        cout << "Error inesperado al crear cliente: " << e.what() << "\n";
+        pausar();
+        return false;
+    }
 }
 
 void mostrarClientes() {
@@ -1089,7 +1115,6 @@ void menuVentas() {
         cout << "5. Eliminar venta\n";
         cout << "6. Gestionar detalles de venta\n";
         cout << "7. Buscar cliente por NIT\n";
-        cout << "8. Imprimir factura\n";
         cout << "9. Generar factura PDF\n";
         cout << "0. Volver al menú principal\n\n";
         opcion = validarOpcionMenu("Ingrese una opcion: ", 0, 9);
@@ -1169,34 +1194,56 @@ void ingresarVenta() {
             // Caso especial para consumidor final (C/F)
             if (nitValidado == "C/F") {
                 cout << "Consumidor final detectado. Creando cliente con NIT: C/F\n";
+                cout << "\n=== CREAR CLIENTE CONSUMIDOR FINAL ===\n";
+                cout << "NIT: C/F (Consumidor Final)\n";
 
-                // Crear cliente automáticamente para consumidor final
-                ingresarClienteConNIT(nitValidado);
+                // Solicitar todos los datos como un cliente normal
+                string nombres, apellidos, telefono, correo_electronico;
+                bool genero = false;
+                char gen;
 
-                // Buscar el cliente recién creado
-                ConexionBD cn = ConexionBD();
-                cn.abrir_conexion();
-                if (cn.getConector()) {
-                    string consultaBuscar = "SELECT idCliente, nombres, apellidos FROM Clientes WHERE NIT = 'C/F' ORDER BY idCliente DESC LIMIT 1;";
-                    int q_estado_buscar = mysql_query(cn.getConector(), consultaBuscar.c_str());
+                nombres = validarTextoNoVacio("Ingrese Nombres: ");
+                apellidos = validarTextoNoVacio("Ingrese Apellidos: ");
+
+                cout << "Ingrese Genero (M/F): ";
+                cin >> gen;
+                genero = (gen == 'M' || gen == 'm') ? true : false;
+                cin.ignore();
+
+                telefono = validarTextoNoVacio("Ingrese Telefono: ");
+                correo_electronico = validarTextoNoVacio("Ingrese Correo Electronico: ");
+
+                string fecha_ingreso = obtenerFechaHoraActual();
+
+                // Usar la clase Cliente directamente como en el CRUD que funciona
+                Cliente clienteNuevo = Cliente(0, nombres, apellidos, "C/F", genero, telefono, correo_electronico, fecha_ingreso);
+                clienteNuevo.crear();
+
+                cout << "\nCliente consumidor final creado exitosamente!" << endl;
+                cout << "Nombre: " << nombres << " " << apellidos << endl;
+                clienteEncontrado = true;
+
+                // Buscar el cliente recién creado usando una consulta simple
+                ConexionBD cnBuscar = ConexionBD();
+                cnBuscar.abrir_conexion();
+                if (cnBuscar.getConector()) {
+                    string consultaBuscar = "SELECT idCliente FROM Clientes WHERE NIT = 'C/F' ORDER BY idCliente DESC LIMIT 1;";
+                    const char* cb = consultaBuscar.c_str();
+                    int q_estado_buscar = mysql_query(cnBuscar.getConector(), cb);
                     if (!q_estado_buscar) {
-                        MYSQL_RES* resultadoBuscar = mysql_store_result(cn.getConector());
-                        if (resultadoBuscar) {
-                            MYSQL_ROW filaBuscar = mysql_fetch_row(resultadoBuscar);
-                            if (filaBuscar) {
-                                idcliente = atoi(filaBuscar[0]);
-                                cout << "\nCliente consumidor final creado: " << filaBuscar[1] << " " << filaBuscar[2] << endl;
-                                clienteEncontrado = true;
+                        MYSQL_RES* resultado = mysql_store_result(cnBuscar.getConector());
+                        if (resultado != nullptr) {
+                            MYSQL_ROW fila = mysql_fetch_row(resultado);
+                            if (fila != nullptr) {
+                                idcliente = atoi(fila[0]);
+                                cout << "ID del cliente: " << idcliente << endl;
                             }
-                            mysql_free_result(resultadoBuscar);
+                            // No liberar resultado manualmente, dejar que MySQL lo maneje automáticamente
                         }
                     }
-                    cn.cerrar_conexion();
                 }
+                // No cerrar conexión aquí, dejar que el destructor lo maneje
 
-                if (!clienteEncontrado) {
-                    cout << "Error al crear el cliente consumidor final. Intente nuevamente.\n";
-                }
                 continue; // Continuar con el bucle
             }
 
@@ -1209,13 +1256,28 @@ void ingresarVenta() {
                 return;
             }
 
-            string consulta = "SELECT idCliente, nombres, apellidos FROM Clientes WHERE NIT = '" + nitValidado + "';";
+            string consulta;
+
+            // Si es C/F, buscar por nombre y apellido
+            if (nitValidado == "C/F") {
+                cout << "\n=== BUSQUEDA DE CONSUMIDOR FINAL ===\n";
+                cout << "Como hay varios clientes con NIT C/F, buscaremos por nombre:\n";
+
+                string nombreBuscar = validarTextoNoVacio("Ingrese el nombre del cliente: ");
+                string apellidoBuscar = validarTextoNoVacio("Ingrese el apellido del cliente: ");
+
+                consulta = "SELECT idCliente, nombres, apellidos FROM Clientes WHERE NIT = 'C/F' AND nombres LIKE '%" + nombreBuscar + "%' AND apellidos LIKE '%" + apellidoBuscar + "%';";
+                cout << "\nBuscando cliente consumidor final: " << nombreBuscar << " " << apellidoBuscar << endl;
+            } else {
+                // Para NITs normales
+                consulta = "SELECT idCliente, nombres, apellidos FROM Clientes WHERE NIT = '" + nitValidado + "';";
+            }
+
             const char* sql = consulta.c_str();
             int q_estado = mysql_query(cn.getConector(), sql);
 
             if (q_estado) {
                 manejarErrorBD("Buscar cliente", consulta, cn.getConector());
-                cn.cerrar_conexion();
                 pausar();
                 return;
             }
@@ -1230,42 +1292,63 @@ void ingresarVenta() {
                 } else {
                     cout << "Cliente no encontrado con NIT: " << nitValidado << endl;
                     if (confirmarOperacion("¿Desea crear un nuevo cliente con este NIT?")) {
-                        mysql_free_result(resultado);
-                        cn.cerrar_conexion();
+                        // No liberar resultado manualmente, dejar que MySQL lo maneje automáticamente
+                        // No cerrar conexión aquí, dejar que el destructor lo maneje
 
-                        // Crear cliente con el NIT ya validado
-                        ingresarClienteConNIT(nitValidado);
+                        // Crear cliente usando la clase Cliente directamente
+                        cout << "\n=== CREAR NUEVO CLIENTE ===\n";
+                        cout << "NIT: " << nitValidado << "\n";
 
-                        // Buscar el cliente recién creado
-                        cn.abrir_conexion();
-                        if (cn.getConector()) {
-                            string consultaBuscar = "SELECT idCliente, nombres, apellidos FROM Clientes WHERE NIT = '" + nitValidado + "';";
-                            int q_estado_buscar = mysql_query(cn.getConector(), consultaBuscar.c_str());
+                        string nombres, apellidos, telefono, correo_electronico;
+                        bool genero = false;
+                        char gen;
+
+                        nombres = validarTextoNoVacio("Ingrese Nombres: ");
+                        apellidos = validarTextoNoVacio("Ingrese Apellidos: ");
+
+                        cout << "Ingrese Genero (M/F): ";
+                        cin >> gen;
+                        genero = (gen == 'M' || gen == 'm') ? true : false;
+                        cin.ignore();
+
+                        telefono = validarTextoNoVacio("Ingrese Telefono: ");
+                        correo_electronico = validarTextoNoVacio("Ingrese Correo Electronico: ");
+
+                        string fecha_ingreso = obtenerFechaHoraActual();
+
+                        // Usar la clase Cliente directamente como en el CRUD que funciona
+                        Cliente clienteNuevo = Cliente(0, nombres, apellidos, nitValidado, genero, telefono, correo_electronico, fecha_ingreso);
+                        clienteNuevo.crear();
+
+                        cout << "\nCliente creado exitosamente!" << endl;
+                        cout << "Nombre: " << nombres << " " << apellidos << endl;
+                        clienteEncontrado = true;
+
+                        // Buscar el cliente recién creado usando una consulta simple
+                        ConexionBD cnBuscar = ConexionBD();
+                        cnBuscar.abrir_conexion();
+                        if (cnBuscar.getConector()) {
+                            string consultaBuscar = "SELECT idCliente FROM Clientes WHERE NIT = '" + nitValidado + "';";
+                            const char* cb = consultaBuscar.c_str();
+                            int q_estado_buscar = mysql_query(cnBuscar.getConector(), cb);
                             if (!q_estado_buscar) {
-                                MYSQL_RES* resultadoBuscar = mysql_store_result(cn.getConector());
-                                if (resultadoBuscar) {
-                                    MYSQL_ROW filaBuscar = mysql_fetch_row(resultadoBuscar);
-                                    if (filaBuscar) {
-                                        idcliente = atoi(filaBuscar[0]);
-                                        cout << "\nCliente creado y encontrado: " << filaBuscar[1] << " " << filaBuscar[2] << endl;
-                                        clienteEncontrado = true;
+                                MYSQL_RES* resultado = mysql_store_result(cnBuscar.getConector());
+                                if (resultado != nullptr) {
+                                    MYSQL_ROW fila = mysql_fetch_row(resultado);
+                                    if (fila != nullptr) {
+                                        idcliente = atoi(fila[0]);
+                                        cout << "ID del cliente: " << idcliente << endl;
                                     }
-                                    mysql_free_result(resultadoBuscar);
+                                    // No liberar resultado manualmente, dejar que MySQL lo maneje automáticamente
                                 }
                             }
-                            cn.cerrar_conexion();
                         }
-
-                        if (!clienteEncontrado) {
-                            cout << "Error al crear o encontrar el cliente. Intente nuevamente.\n";
-                        }
+                        // No cerrar conexión aquí, dejar que el destructor lo maneje
                     } else {
                         cout << "Intente con otro NIT o cancele la operacion.\n";
                     }
                 }
-                mysql_free_result(resultado);
             }
-            cn.cerrar_conexion();
         } while (!clienteEncontrado);
 
         // Mostrar empleados disponibles
@@ -1345,7 +1428,6 @@ void ingresarVenta() {
 
             if (q_estado) {
                 manejarErrorBD("Buscar producto", consulta, cn.getConector());
-                cn.cerrar_conexion();
                 cout << "\n¿Desea intentar con otro producto? (S/N): ";
                 cin >> agregarDetalle;
                 cin.ignore();
@@ -1354,9 +1436,9 @@ void ingresarVenta() {
 
             MYSQL_RES* resultado = mysql_store_result(cn.getConector());
             bool productoEncontrado = false;
-            if (resultado) {
+            if (resultado != nullptr) {
                 MYSQL_ROW fila = mysql_fetch_row(resultado);
-                if (fila) {
+                if (fila != nullptr) {
                     detalle.precio_unitario = atof(fila[0]);
                     double subtotal = stod(detalle.cantidad) * detalle.precio_unitario;
                     cout << "Producto: " << fila[1] << "\n";
@@ -1366,9 +1448,9 @@ void ingresarVenta() {
                 } else {
                     cout << "Producto no encontrado con ID: " << detalle.idProducto << "\n";
                 }
-                mysql_free_result(resultado);
+                // No liberar resultado manualmente, dejar que MySQL lo maneje automáticamente
             }
-            cn.cerrar_conexion();
+            // No cerrar conexión manualmente, el destructor lo hará automáticamente
 
             if (!productoEncontrado) {
                 cout << "\n¿Desea intentar con otro producto? (S/N): ";
@@ -2493,17 +2575,17 @@ void buscarClientePorNIT() {
 
     string nitBuscar;
     cout << "Ingrese el NIT del cliente a buscar\n";
-    cout << "(Solo NITs especificos, no se permite C/F en busquedas)\n";
+    cout << "(Si no tiene NIT, ingrese: C/F para consumidor final)\n";
     cout << "NIT del cliente: ";
     getline(cin, nitBuscar);
 
-    // Validar formato del NIT para búsqueda (excluye C/F)
-    string nitValidado = validarFormatoNITParaBusqueda(nitBuscar);
+    // Validar formato del NIT (ahora permite C/F)
+    string nitValidado = validarFormatoNIT(nitBuscar);
     if (nitValidado.empty()) {
-        cout << "\nFormato de NIT invalido para busqueda. Intente nuevamente.\n";
-        cout << "Formatos validos para busqueda:\n";
+        cout << "\nFormato de NIT invalido. Intente nuevamente.\n";
+        cout << "Formatos validos:\n";
         cout << "- NIT: 8 a 13 digitos (ej: 12345678, 1234567890123)\n";
-        cout << "- NO se permite C/F en busquedas (es para consumidor final sin NIT especifico)\n";
+        cout << "- Consumidor final: C/F\n\n";
         pausar();
         return;
     }
@@ -2514,19 +2596,29 @@ void buscarClientePorNIT() {
     ConexionBD cn = ConexionBD();
     cn.abrir_conexion();
     if (cn.getConector()) {
-        string consulta = "SELECT idCliente, nombres, apellidos, NIT, telefono, correo_electronico FROM Clientes WHERE NIT = '" + nitValidado + "';";
+        string consulta;
+
+        // Si es C/F, buscar por nombre y apellido
+        if (nitValidado == "C/F") {
+            cout << "\n=== BUSQUEDA DE CONSUMIDOR FINAL ===\n";
+            cout << "Como hay varios clientes con NIT C/F, buscaremos por nombre:\n";
+
+            string nombreBuscar = validarTextoNoVacio("Ingrese el nombre del cliente: ");
+            string apellidoBuscar = validarTextoNoVacio("Ingrese el apellido del cliente: ");
+
+            consulta = "SELECT idCliente, nombres, apellidos, NIT, telefono, correo_electronico FROM Clientes WHERE NIT = 'C/F' AND nombres LIKE '%" + nombreBuscar + "%' AND apellidos LIKE '%" + apellidoBuscar + "%';";
+            cout << "\nBuscando cliente consumidor final: " << nombreBuscar << " " << apellidoBuscar << endl;
+        } else {
+            // Para NITs normales
+            consulta = "SELECT idCliente, nombres, apellidos, NIT, telefono, correo_electronico FROM Clientes WHERE NIT = '" + nitValidado + "';";
+        }
+
         const char* sql = consulta.c_str();
-
-        cout << "Ejecutando consulta: " << consulta << endl;
-
         int q_estado = mysql_query(cn.getConector(), sql);
         if (!q_estado) {
             MYSQL_RES* resultado = mysql_store_result(cn.getConector());
 
             if (resultado) {
-                int num_filas = mysql_num_rows(resultado);
-                cout << "Número de registros encontrados: " << num_filas << endl;
-
                 MYSQL_ROW fila = mysql_fetch_row(resultado);
 
                 if (fila) {
@@ -2548,7 +2640,7 @@ void buscarClientePorNIT() {
                     }
                 }
 
-                mysql_free_result(resultado);
+                // No liberar resultado manualmente, dejar que MySQL lo maneje automáticamente
             } else {
                 cout << "Error al obtener resultados de la consulta.\n";
             }
@@ -2558,7 +2650,7 @@ void buscarClientePorNIT() {
     } else {
         cout << "Error en la conexión a la base de datos.\n";
     }
-    cn.cerrar_conexion();
+    // No cerrar conexión manualmente, el destructor lo hará automáticamente
 
     pausar();
 }
@@ -2631,7 +2723,7 @@ void imprimirFactura() {
                              << "    Q " << filaDetalle[3] << "\n";
                         total += atof(filaDetalle[4]);
                     }
-                    mysql_free_result(resultadoDetalles);
+                    // No liberar resultado manualmente, dejar que MySQL lo maneje automáticamente
                 }
 
                 cout << "======================================\n";
@@ -2642,12 +2734,12 @@ void imprimirFactura() {
             } else {
                 cout << "No se encontró la venta especificada.\n";
             }
-            mysql_free_result(resultado);
+            // No liberar resultado manualmente, dejar que MySQL lo maneje automáticamente
         }
     } else {
         cout << "Error en la conexión a la base de datos.\n";
     }
-    cn.cerrar_conexion();
+    // No cerrar conexión manualmente, el destructor lo hará automáticamente
 
     pausar();
 }
@@ -2703,7 +2795,7 @@ void actualizarDetalleCompra() {
                 cout << "Producto no encontrado. Usando precio 0.00" << endl;
                 precio_unitario = 0.0;
             }
-            mysql_free_result(resultado);
+            // No liberar resultado manualmente, dejar que MySQL lo maneje automáticamente
         }
 
         // Actualizar en la base de datos
@@ -2729,7 +2821,7 @@ void actualizarDetalleCompra() {
     else {
         cout << "xxx Error en la conexión xxx" << endl;
     }
-    cn.cerrar_conexion();
+    // No cerrar conexión manualmente, el destructor lo hará automáticamente
 
     pausar();
 }
@@ -2781,7 +2873,7 @@ void eliminarDetalleCompra() {
         else {
             cout << "xxx Error en la conexión xxx" << endl;
         }
-        cn.cerrar_conexion();
+        // No cerrar conexión manualmente, el destructor lo hará automáticamente
     } else {
         cout << "\nOperación cancelada.\n";
     }
@@ -2842,7 +2934,7 @@ void actualizarDetalleVenta() {
                 cout << "Producto no encontrado. Usando precio 0.00" << endl;
                 precio_unitario = 0.0;
             }
-            mysql_free_result(resultado);
+            // No liberar resultado manualmente, dejar que MySQL lo maneje automáticamente
         }
 
         // Actualizar en la base de datos
@@ -2867,7 +2959,7 @@ void actualizarDetalleVenta() {
     else {
         cout << "xxx Error en la conexión xxx" << endl;
     }
-    cn.cerrar_conexion();
+    // No cerrar conexión manualmente, el destructor lo hará automáticamente
 
     pausar();
 }
@@ -2919,7 +3011,7 @@ void eliminarDetalleVenta() {
         else {
             cout << "xxx Error en la conexión xxx" << endl;
         }
-        cn.cerrar_conexion();
+        // No cerrar conexión manualmente, el destructor lo hará automáticamente
     } else {
         cout << "\nOperación cancelada.\n";
     }
