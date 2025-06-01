@@ -1,34 +1,31 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\",
+  "WorkspaceRootPath": "C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|solutionrelative:vista\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\ConexionBD.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|solutionrelative:vista\\ConexionBD.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Marca.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\vista\\Marca.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|solutionrelative:vista\\Marca.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\ConexionBD.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\vista\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|solutionrelative:vista\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\vista\\ConexionBD.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|solutionrelative:vista\\ConexionBD.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\vista\\ConexionBD.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|solutionrelative:vista\\ConexionBD.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Empleado.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|solutionrelative:vista\\Empleado.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Empleado.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Empleado.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|solutionrelative:vista\\Empleado.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Empleado.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Persona.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{F093E22E-6EC0-4538-B814-82C044B1CD7D}|vista\\vista.vcxproj|solutionrelative:vista\\Persona.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Persona.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
   "DocumentGroupContainers": [
@@ -38,17 +35,17 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 0,
               "Title": "Marca.h",
-              "DocumentMoniker": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Marca.h",
+              "DocumentMoniker": "C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\vista\\Marca.h",
               "RelativeDocumentMoniker": "vista\\Marca.h",
-              "ToolTip": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Marca.h",
+              "ToolTip": "C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\vista\\Marca.h",
               "RelativeToolTip": "vista\\Marca.h",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAKAAAAAAAAAA==",
+              "ViewState": "AgIAACQAAAAAAAAAAAAAABUAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-05-16T22:59:04.696Z",
               "EditorCaption": ""
@@ -58,74 +55,70 @@
               "DocumentIndex": 4,
               "Title": "Empleado.h",
               "DocumentMoniker": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Empleado.h",
-              "RelativeDocumentMoniker": "vista\\Empleado.h",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Empleado.h",
               "ToolTip": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Empleado.h",
-              "RelativeToolTip": "vista\\Empleado.h",
+              "RelativeToolTip": "..\\..\\..\\..\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Empleado.h",
               "ViewState": "AgIAAHQAAAAAAAAAAAAawIMAAABLAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-05-16T21:07:33.583Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-16T21:07:33.583Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "main.cpp",
-              "DocumentMoniker": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\main.cpp",
+              "DocumentMoniker": "C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\vista\\main.cpp",
               "RelativeDocumentMoniker": "vista\\main.cpp",
-              "ToolTip": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\main.cpp",
+              "ToolTip": "C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\vista\\main.cpp",
               "RelativeToolTip": "vista\\main.cpp",
-              "ViewState": "AgIAAHUAAAAAAAAAAAAawH4AAAAcAAAAAAAAAA==",
+              "ViewState": "AgIAAHUAAAAAAAAAAAAawH4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2025-05-16T21:07:24.347Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "ConexionBD.h",
-              "DocumentMoniker": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\ConexionBD.h",
+              "DocumentMoniker": "C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\vista\\ConexionBD.h",
               "RelativeDocumentMoniker": "vista\\ConexionBD.h",
-              "ToolTip": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\ConexionBD.h",
+              "ToolTip": "C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\vista\\ConexionBD.h",
               "RelativeToolTip": "vista\\ConexionBD.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAXAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2025-05-16T19:14:57.427Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-16T19:14:57.427Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
               "Title": "ConexionBD.cpp",
-              "DocumentMoniker": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\ConexionBD.cpp",
+              "DocumentMoniker": "C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\vista\\ConexionBD.cpp",
               "RelativeDocumentMoniker": "vista\\ConexionBD.cpp",
-              "ToolTip": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\ConexionBD.cpp",
+              "ToolTip": "C:\\Users\\ibane\\OneDrive\\Desktop\\ProyectoUniversidad\\vista\\ConexionBD.cpp",
               "RelativeToolTip": "vista\\ConexionBD.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-05-16T19:14:51.088Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-16T19:14:51.088Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
               "Title": "Empleado.cpp",
               "DocumentMoniker": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Empleado.cpp",
-              "RelativeDocumentMoniker": "vista\\Empleado.cpp",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Empleado.cpp",
               "ToolTip": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Empleado.cpp",
-              "RelativeToolTip": "vista\\Empleado.cpp",
+              "RelativeToolTip": "..\\..\\..\\..\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Empleado.cpp",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
-              "WhenOpened": "2025-05-16T22:27:24.404Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-05-16T22:27:24.404Z"
             },
             {
               "$type": "Document",
               "DocumentIndex": 6,
               "Title": "Persona.h",
               "DocumentMoniker": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Persona.h",
-              "RelativeDocumentMoniker": "vista\\Persona.h",
+              "RelativeDocumentMoniker": "..\\..\\..\\..\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Persona.h",
               "ToolTip": "C:\\Users\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Persona.h",
-              "RelativeToolTip": "vista\\Persona.h",
+              "RelativeToolTip": "..\\..\\..\\..\\VELA\\Desktop\\SEMESTRE3\\PROGRA\\PROYECTOFINAL\\vista\\Persona.h",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
               "WhenOpened": "2025-05-13T04:55:05.351Z"

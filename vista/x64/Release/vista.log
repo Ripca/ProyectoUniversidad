@@ -1,10 +1,26 @@
-﻿  Marca.cpp
-  Proveedor.cpp
+﻿  Cliente.cpp
+  Compra.cpp
+  ConexionBD.cpp
+/Cliente.cpp(1,1): error C1083: No se puede abrir el archivo origen: 'Cliente.cpp': No such file or directory
+  (compilando archivo de origen "/Cliente.cpp")
+  
+/Compra.cpp(1,1): error C1083: No se puede abrir el archivo origen: 'Compra.cpp': No such file or directory
+  (compilando archivo de origen "/Compra.cpp")
+  
+  Empleado.cpp
+/Empleado.cpp(1,1): error C1083: No se puede abrir el archivo origen: 'Empleado.cpp': No such file or directory
+  (compilando archivo de origen "/Empleado.cpp")
+  
   main.cpp
-C:\Users\VELA\Desktop\SEMESTRE3\PROGRA\PROYECTOFINAL\vista\main.cpp(33,10): warning C4101: 'buffer': variable local sin referencia
-  Generando código
-  4 of 395 functions ( 1.0%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    46 functions had inline decision re-evaluated but remain unchanged
-  Generación de código finalizada
-  vista.vcxproj -> C:\Users\VELA\Desktop\SEMESTRE3\PROGRA\PROYECTOFINAL\x64\Release\vista.exe
+C:\Users\ibane\OneDrive\Desktop\ProyectoUniversidad\vista\main.cpp(10,10): error C1083: No se puede abrir el archivo incluir: 'Puesto.h': No such file or directory
+  Marca.cpp
+  Producto.cpp
+  Proveedor.cpp
+  Puesto.cpp
+/Puesto.cpp(1,1): error C1083: No se puede abrir el archivo origen: 'Puesto.cpp': No such file or directory
+  (compilando archivo de origen "/Puesto.cpp")
+  
+  Venta.cpp
+/Venta.cpp(1,1): error C1083: No se puede abrir el archivo origen: 'Venta.cpp': No such file or directory
+  (compilando archivo de origen "/Venta.cpp")
+  
